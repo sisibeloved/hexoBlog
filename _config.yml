@@ -7,8 +7,8 @@ title: Hexo
 subtitle:
 description:
 keywords:
-author: John Doe
-language:
+author: 陆尘
+language: zh-CN
 timezone:
 
 # URL
@@ -73,11 +73,13 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+#theme: landscape
+theme: hexo-theme-next-6.1.0
+#theme: hexo-theme-material-1.4.0
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@:github.com/sisibeloved/hexoBlog.git
+  repo: git@github.com:sisibeloved/hexoBlog.git
   branch: gh-pages

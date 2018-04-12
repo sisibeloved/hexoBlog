@@ -3,18 +3,20 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
+title: luchen's blog
 subtitle:
-description:
+description: 人分两类 要么迷人 要么乏味
 keywords:
 author: 陆尘
-language: zh-CN
+language:
+- zh-CN
+- _en
 timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
-root: /hexoBlog
+url: https://sisibeloved.github.io/hexoBlog
+root: /hexoBlog/
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 

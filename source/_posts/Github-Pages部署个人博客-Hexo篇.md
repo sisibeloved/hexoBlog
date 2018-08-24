@@ -1,5 +1,5 @@
 ---
-title: Github Pages部署个人博客（Hexo篇）
+title: Github Pages部署个人博客 - Hexo篇
 date: 2018-04-12 10:34:00
 categories: Blog
 tags:

@@ -15,7 +15,7 @@ luchen's blog，[传送门](https://sisibeloved.github.io/hexoBlog)
 
 ### 原创系列
 
-- [Github Pages 部署个人博客（Hexo 篇）](https://sisibeloved.github.io/hexoBlog/2018/04/12/Github-Pages%E9%83%A8%E7%BD%B2%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2-(Hexo%E7%AF%87%EF%BC%89/)
+- [Github Pages 部署个人博客（Hexo 篇）](https://sisibeloved.github.io/hexoBlog/2018/04/12/Github-Pages%E9%83%A8%E7%BD%B2%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2-Hexo%E7%AF%87/)
 - [RocketMQ 安装及部署](https://sisibeloved.github.io/hexoBlog/2018/03/20/RocketMQ%E5%AE%89%E8%A3%85%E5%8F%8A%E9%83%A8%E7%BD%B2/)
 
 ### 翻译系列

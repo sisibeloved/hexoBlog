@@ -2,8 +2,12 @@
 Thumbs.db
 db.json
 *.log
+
+--- npm ---
 node_modules/
 public/
 .deploy*/
 
+--- IDE ---
 .idea/
+.vscode/

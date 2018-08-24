@@ -1,7 +1,10 @@
 ---
 title: Github Pages部署个人博客（Hexo篇）
 date: 2018-04-12 10:34:00
-tags: Github
+categories: Blog
+tags:
+- Github
+- Blog
 ---
 
 ## 前言
@@ -318,5 +321,5 @@ fatal: could not read Username for 'https://github.com': No error
 FATAL Something's wrong. Maybe you can find the solution here: http://hexo.io/docs/troubleshooting.html
 ```
 
-+ 见[修改`_config.yml`](#修改`_config.yml`)
++ 见[修改`_config.yml`](#修改_config.yml)
 + 将HTTPS协议改成Git协议，注意`github.com`后面，HTTPS是`/`，Git是`:`

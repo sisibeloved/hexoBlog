@@ -1,7 +1,9 @@
 ---
 title: RocketMQ安装及部署
-date: 2018-04-09 10:04:41
+date: 2018-03-20 10:04:41
+categories: 运维
 tags:
+- RocketMQ
 ---
 
 ## 版本信息

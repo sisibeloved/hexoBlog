@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN,_en,default">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/hexoBlog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/hexoBlog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/hexoBlog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/hexoBlog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/hexoBlog/css/main.css">
+
+
+<link rel="stylesheet" href="/hexoBlog/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://sisibeloved.github.io/hexoBlog').hostname,
+    root: '/hexoBlog/',
+    scheme: 'Gemini',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="原文地址：How to build a Serverless API with Go and AWS Lambda 原文作者：Alex Edwards 译文出自：掘金翻译计划 本文永久链接：https://github.com/xitu/gold-miner/blob/master/TODO1/serverless-api-with-go-and-aws-lambda.md 译者：sisibe">
+<meta name="keywords" content="Serverless,Go,AWS,Lambda">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 Go 和 AWS Lambda 构建无服务 API">
+<meta property="og:url" content="https://sisibeloved.github.io/hexoBlog/2018/05/10/使用 Go 和 AWS Lambda 构建无服务 API/index.html">
+<meta property="og:site_name" content="luchen&#39;s blog">
+<meta property="og:description" content="原文地址：How to build a Serverless API with Go and AWS Lambda 原文作者：Alex Edwards 译文出自：掘金翻译计划 本文永久链接：https://github.com/xitu/gold-miner/blob/master/TODO1/serverless-api-with-go-and-aws-lambda.md 译者：sisibe">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-12-21T11:58:19.113Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 Go 和 AWS Lambda 构建无服务 API">
+<meta name="twitter:description" content="原文地址：How to build a Serverless API with Go and AWS Lambda 原文作者：Alex Edwards 译文出自：掘金翻译计划 本文永久链接：https://github.com/xitu/gold-miner/blob/master/TODO1/serverless-api-with-go-and-aws-lambda.md 译者：sisibe">
+
+<link rel="canonical" href="https://sisibeloved.github.io/hexoBlog/2018/05/10/使用 Go 和 AWS Lambda 构建无服务 API/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>使用 Go 和 AWS Lambda 构建无服务 API | luchen's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/hexoBlog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">luchen's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/hexoBlog/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/hexoBlog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/hexoBlog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/hexoBlog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sisibeloved.github.io/hexoBlog/2018/05/10/使用 Go 和 AWS Lambda 构建无服务 API/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/hexoBlog/images/avatar.jpg">
+      <meta itemprop="name" content="陆尘">
+      <meta itemprop="description" content="人分两类 要么迷人 要么乏味">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="luchen's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用 Go 和 AWS Lambda 构建无服务 API
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-10 11:36:22" itemprop="dateCreated datePublished" datetime="2018-05-10T11:36:22+08:00">2018-05-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-12-21 19:58:19" itemprop="dateModified" datetime="2020-12-21T19:58:19+08:00">2020-12-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/hexoBlog/categories/Translation/" itemprop="url" rel="index">
+                    <span itemprop="name">Translation</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<ul>
+<li>原文地址：<a href="http://www.alexedwards.net/blog/serverless-api-with-go-and-aws-lambda" target="_blank" rel="noopener">How to build a Serverless API with Go and AWS Lambda</a></li>
+<li>原文作者：<a href="http://www.alexedwards.net" target="_blank" rel="noopener">Alex Edwards</a></li>
+<li>译文出自：<a href="https://github.com/xitu/gold-miner" target="_blank" rel="noopener">掘金翻译计划</a></li>
+<li>本文永久链接：<a href="https://github.com/xitu/gold-miner/blob/master/TODO1/serverless-api-with-go-and-aws-lambda.md" target="_blank" rel="noopener">https://github.com/xitu/gold-miner/blob/master/TODO1/serverless-api-with-go-and-aws-lambda.md</a></li>
+<li>译者：<a href="https://github.com/sisibeloved" target="_blank" rel="noopener">sisibeloved</a></li>
+<li>校对者：<a href="https://github.com/luochen1992" target="_blank" rel="noopener">luochen1992</a>、<a href="https://github.com/SergeyChang" target="_blank" rel="noopener">SergeyChang</a></li>
+</ul>
+</blockquote>
+<p>早些时候 AWS 宣布了他们的 <a href="https://aws.amazon.com/lambda/" target="_blank" rel="noopener">Lambda</a> 服务将会为 Go 语言提供首要支持，这对于想要体验无服务技术的 GO 语言程序员（比如我自己）来说前进了一大步。</p>
+<p>所以在这篇文章中我将讨论如何一步一步创建一个依赖 AWS Lambda 的 HTTPS API。我发现在这个过程中会有很多坑 — 特别是你对 AWS 的权限系统不熟悉的话 — 而且 Lamdba 接口和其它 AWS 服务对接时有很多磕磕碰碰的地方。但是一旦你弄懂了，这些工具都会非常好使。</p>
+<p>这篇教程涵盖了许多方面的内容，所以我将它分成以下七个步骤：</p>
+<ol>
+<li><a href="#构建-aws-cli">构建 AWS CLI</a></li>
+<li><a href="#创建并部署一个-lambda-函数">创建并部署一个 Lambda 函数</a></li>
+<li><a href="#链接到-dynamodb">链接到 DynamoDB</a></li>
+<li><a href="#构建-https-api">构建 HTTPS API</a></li>
+<li><a href="#处理事件">处理事件</a></li>
+<li><a href="#部署-api">部署 API</a></li>
+<li><a href="#支持多种行为">支持多种行为</a></li>
+</ol>
+<a id="more"></a>
+
+<p>通过这篇文章我们将努力构建一个具有两个功能的 API：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路径</th>
+<th>行为</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td>/books?isbn=xxx</td>
+<td>展示带有指定 ISBN 的 book 对象的信息</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>/books</td>
+<td>创建一个 book 对象</td>
+</tr>
+</tbody></table>
+<p>一个 book 对象是一条像这样的原生 JSON 记录：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;isbn&quot;:&quot;978-1420931693&quot;,&quot;title&quot;:&quot;The Republic&quot;,&quot;author&quot;:&quot;Plato&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我会保持 API 的简单易懂，避免在特定功能的代码中陷入困境，但是当你掌握了基础知识之后，怎样扩展 API 来支持附加的路由和行为就变得轻而易举了。</p>
+<h2 id="构建-AWS-CLI"><a href="#构建-AWS-CLI" class="headerlink" title="构建 AWS CLI"></a>构建 AWS CLI</h2><ol>
+<li><p>整个教程中我们会使用 AWS CLI（命令行接口）来设置我们的 lambda 函数和其它 AWS 服务。安装和基本使用指南可以<a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html" target="_blank" rel="noopener">在这儿找到</a>，不过如果你使用了一个基于 Debian 的系统，比如 Ubuntu，你可以通过 <code>apt</code> 安装 CLI 并使用 <code>aws</code> 命令来运行它：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt install awscli</span><br><span class="line">$ aws --version</span><br><span class="line">aws-cli/1.11.139 Python/3.6.3 Linux/4.13.0-37-generic botocore/1.6.6</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>接下来我们需要创建一个带有<strong>允许程序访问</strong>权限的 AWS IAM 以供 CLI 使用。如何操作的指南可以<a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html" target="_blank" rel="noopener">在这儿找到</a>。出于测试的目的，你可以为这个用户附加拥有所有权限的 <code>AdministratorAccess</code> 托管策略，但在实际生产中我建议你使用更严格的策略。创建完用户后你将获得一个访问密钥 ID 和访问私钥。留意一下这些 —— 你将在下一步使用它们。</p>
+</li>
+<li><p>使用你刚创建的 IAM 用户的凭证，通过 <code>configure</code> 命令来配置你的 CLI。你需要指定<a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html" target="_blank" rel="noopener">默认地区</a>和你想要 CLI 使用的<a href="https://docs.aws.amazon.com/cli/latest/userguide/controlling-output.html" target="_blank" rel="noopener">输出格式</a> 。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ aws configure</span><br><span class="line">AWS Access Key ID [None]: access-key-ID</span><br><span class="line">AWS Secret Access Key [None]: secret-access-key</span><br><span class="line">Default region name [None]: us-east-1</span><br><span class="line">Default output format [None]: json</span><br></pre></td></tr></table></figure>
+
+<p>（假定你使用的是 <code>us-east-1</code> 地区 —— 如果你正在使用一个不同的地区，你需要相应地修改这个代码片段。）</p>
+</li>
+</ol>
+<h2 id="创建并部署一个-Lambda-函数"><a href="#创建并部署一个-Lambda-函数" class="headerlink" title="创建并部署一个 Lambda 函数"></a>创建并部署一个 Lambda 函数</h2><ol>
+<li><p>接下来就是激动人心的时刻：创建一个 lambda 函数。如果你正在照着做，进入你的 <code>$GOPATH/src</code> 文件夹，创建一个含有一个 <code>main.go</code> 文件的 <code>books</code> 仓库。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ cd ~/go/src</span><br><span class="line">$ mkdir books &amp;&amp; cd books</span><br><span class="line">$ touch main.go</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>接着你需要安装 <a href="https://github.com/aws/aws-lambda-go" target="_blank" rel="noopener"><code>github.com/aws-lambda-go/lambda</code></a> 包。这个包提供了创建 lambda 函数必需的 Go 语言库和类型。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ go get github.com/aws/aws-lambda-go/lambda</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>然后打开 <code>main.go</code> 文件，输入以下代码：</p>
+<p>文件：books/main.go</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"github.com/aws/aws-lambda-go/lambda"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> book <span class="keyword">struct</span> &#123;</span><br><span class="line">    ISBN   <span class="keyword">string</span> <span class="string">`json:"isbn"`</span></span><br><span class="line">    Title  <span class="keyword">string</span> <span class="string">`json:"title"`</span></span><br><span class="line">    Author <span class="keyword">string</span> <span class="string">`json:"author"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">show</span><span class="params">()</span> <span class="params">(*book, error)</span></span> &#123;</span><br><span class="line">    bk := &amp;book&#123;</span><br><span class="line">        ISBN:   <span class="string">"978-1420931693"</span>,</span><br><span class="line">        Title:  <span class="string">"The Republic"</span>,</span><br><span class="line">        Author: <span class="string">"Plato"</span>,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> bk, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    lambda.Start(show)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>main()</code> 函数中我们调用 <code>lambda.Start()</code> 并传入了 <code>show</code> 函数作为 lambda <strong>处理程序</strong>。在这个示例中处理函数仅简单地初始化并返回了一个新的 <code>book</code> 对象。</p>
+<p>Lamdba 处理程序能够接收一系列不同的 Go 函数签名，并通过反射来确定哪个是你正在用的。它所支持的完整列表是……</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">func()</span><br><span class="line">func() error</span><br><span class="line">func(TIn) error</span><br><span class="line">func() (TOut, error)</span><br><span class="line">func(TIn) (TOut, error)</span><br><span class="line">func(context.Context) error</span><br><span class="line">func(context.Context, TIn) error</span><br><span class="line">func(context.Context) (TOut, error)</span><br><span class="line">func(context.Context, TIn) (TOut, error)</span><br></pre></td></tr></table></figure>
+
+<p>…… 其中的 <code>TIn</code> 和 <code>TOut</code> 参数是可以通过 Go 的 <code>encoding/json</code> 包构建（和解析）的对象。</p>
+</li>
+<li><p>下一步是使用 <code>go build</code> 从 <code>books</code> 包构建一个可执行程序。在下面的代码片段中我使用 <code>-o</code> 标识来把可执行程序存到 <code>/tmp/main</code> ，当然，你也可以把它存到你想存的任意位置（同样地可以命名为任意名称）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ env GOOS=linux GOARCH=amd64 go build -o /tmp/main books</span><br></pre></td></tr></table></figure>
+
+<p>重要：作为这个命令的一部分，我们使用 <code>env</code> 来设置两个命令运行期间的临时的环境变量（<code>GOOS=linux</code> 和 <code>GOARCH=amd64</code>）。这会指示 Go 编译器创建一个适用于 amd64 架构的 linux 系统的可执行程序 —— 就是当我们部署到 AWS 上时将会运行的环境。</p>
+</li>
+<li><p>AWS 要求我们以 zip 格式上传 lambda 函数，所以创建一个包含我们刚才创建的可执行程序的 <code>main.zip</code> 文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ zip -j /tmp/main.zip /tmp/main</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是可执行程序必须在 zip 文件的<strong>根目录下</strong> —— 不是在 zip 文件的某个文件夹中。为了确保这一点，我在上面的代码片段中用了 <code>-j</code> 标识来丢弃目录名称。</p>
+</li>
+<li><p>下一步有点麻烦，但是对于让我们的 lambda 正确运行至关重要。我们需要建立一个 IAM 角色，它定义了 <strong>lambda 函数运行时需要的</strong>权限。</p>
+<p>现在让我们来建立一个 <code>lambda-books-executor</code> 角色，并给它附加 <code>AWSLambdaBasicExecutionRole</code> 托管政策。这会给我们的 lambda 函数运行和输出日志到 AWS 云监控服务所需的最基本的权限。</p>
+<p>首先我们需要创建一个<strong>信任策略</strong> JSON 文件。这会从根本上指示 AWS 允许 lambda 服务扮演 <code>lambda-books-executor</code> 角色：</p>
+<p>文件：/tmp/trust-policy.json</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"Version"</span>: <span class="string">"2012-10-17"</span>,</span><br><span class="line">    <span class="attr">"Statement"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"Effect"</span>: <span class="string">"Allow"</span>,</span><br><span class="line">            <span class="attr">"Principal"</span>: &#123;</span><br><span class="line">                <span class="attr">"Service"</span>: <span class="string">"lambda.amazonaws.com"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">"Action"</span>: <span class="string">"sts:AssumeRole"</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后使用 <code>aws iam create-role</code> 命令来创建带有这个信任策略的用户：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">$ aws iam create-role --role-name lambda-books-executor \</span><br><span class="line">--assume-role-policy-document file:///tmp/trust-policy.json</span><br><span class="line">&#123;</span><br><span class="line">    &quot;Role&quot;: &#123;</span><br><span class="line">        &quot;Path&quot;: &quot;/&quot;,</span><br><span class="line">        &quot;RoleName&quot;: &quot;lambda-books-executor&quot;,</span><br><span class="line">        &quot;RoleId&quot;: &quot;AROAIWSQS2RVEWIMIHOR2&quot;,</span><br><span class="line">        &quot;Arn&quot;: &quot;arn:aws:iam::account-id:role/lambda-books-executor&quot;,</span><br><span class="line">        &quot;CreateDate&quot;: &quot;2018-04-05T10:22:32.567Z&quot;,</span><br><span class="line">        &quot;AssumeRolePolicyDocument&quot;: &#123;</span><br><span class="line">            &quot;Version&quot;: &quot;2012-10-17&quot;,</span><br><span class="line">            &quot;Statement&quot;: [</span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;Effect&quot;: &quot;Allow&quot;,</span><br><span class="line">                    &quot;Principal&quot;: &#123;</span><br><span class="line">                        &quot;Service&quot;: &quot;lambda.amazonaws.com&quot;</span><br><span class="line">                    &#125;,</span><br><span class="line">                    &quot;Action&quot;: &quot;sts:AssumeRole&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关注一下返回的 ARN（亚马逊资源名）—— 在下一步中你需要用到它。</p>
+<p>现在这个 <code>lambda-books-executor</code> 已经被创建，我们需要指定这个角色拥有的权限。最简单的方法是用 <code>aws iam attach-role-policy</code> 命令，像这样传入 <code>AWSLambdaBasicExecutionRole</code> 的 ARN 和许可政策：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ aws iam attach-role-policy --role-name lambda-books-executor \</span><br><span class="line">--policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole</span><br></pre></td></tr></table></figure>
+
+<p>提示：你可以在<a href="https://docs.aws.amazon.com/lambda/latest/dg/intro-permission-model.html#lambda-intro-execution-role" target="_blank" rel="noopener">这里</a>找到一系列其他的许可政策，或许能对你有所帮助。</p>
+</li>
+<li><p>现在我们可以真正地把 lambda 函数部署到 AWS 上了。我们可以使用 <code>aws lambda create-function</code> 命令。这个命令接收以下标识，并且需要运行一到两分钟。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--function-name</code></td>
+<td>将在 AWS 中被调用的 lambda 函数名</td>
+</tr>
+<tr>
+<td><code>--runtime</code></td>
+<td>lambda 函数的运行环境（在我们的例子里用 <code>&quot;go1.x&quot;</code>）</td>
+</tr>
+<tr>
+<td><code>--role</code></td>
+<td>你想要 lambda 函数在运行时扮演的角色的 ARN（见上面的步骤 6）</td>
+</tr>
+<tr>
+<td><code>--handler</code></td>
+<td>zip 文件根目录下的可执行文件的名称</td>
+</tr>
+<tr>
+<td><code>--zip-file</code></td>
+<td>zip 文件的路径</td>
+</tr>
+</tbody></table>
+<p>接下去尝试部署：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ aws lambda create-function --function-name books --runtime go1.x \</span><br><span class="line">--role arn:aws:iam::account-id:role/lambda-books-executor \</span><br><span class="line">--handler main --zip-file fileb:///tmp/main.zip</span><br><span class="line">&#123;</span><br><span class="line">    &quot;FunctionName&quot;: &quot;books&quot;,</span><br><span class="line">    &quot;FunctionArn&quot;: &quot;arn:aws:lambda:us-east-1:account-id:function:books&quot;,</span><br><span class="line">    &quot;Runtime&quot;: &quot;go1.x&quot;,</span><br><span class="line">    &quot;Role&quot;: &quot;arn:aws:iam::account-id:role/lambda-books-executor&quot;,</span><br><span class="line">    &quot;Handler&quot;: &quot;main&quot;,</span><br><span class="line">    &quot;CodeSize&quot;: 2791699,</span><br><span class="line">    &quot;Description&quot;: &quot;&quot;,</span><br><span class="line">    &quot;Timeout&quot;: 3,</span><br><span class="line">    &quot;MemorySize&quot;: 128,</span><br><span class="line">    &quot;LastModified&quot;: &quot;2018-04-05T10:25:05.343+0000&quot;,</span><br><span class="line">    &quot;CodeSha256&quot;: &quot;O20RZcdJTVcpEiJiEwGL2bX1PtJ/GcdkusIEyeO9l+8=&quot;,</span><br><span class="line">    &quot;Version&quot;: &quot;$LATEST&quot;,</span><br><span class="line">    &quot;TracingConfig&quot;: &#123;</span><br><span class="line">        &quot;Mode&quot;: &quot;PassThrough&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>大功告成！我们的 lambda 函数已经被部署上去并可以用了。你可以使用 <code>aws lambda invoke</code> 命令来试验一下（你需要为响应指定一个输出文件 —— 我在下面的代码片段中用了 <code>/tmp/output.json</code>）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ aws lambda invoke --function-name books /tmp/output.json</span><br><span class="line">&#123;</span><br><span class="line">    &quot;StatusCode&quot;: 200</span><br><span class="line">&#125;</span><br><span class="line">$ cat /tmp/output.json</span><br><span class="line">&#123;&quot;isbn&quot;:&quot;978-1420931693&quot;,&quot;title&quot;:&quot;The Republic&quot;,&quot;author&quot;:&quot;Plato&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果你一路照着做，你很有可能得到一个相同的响应。注意到了我们在 Go 代码中初始化的 <code>book</code> 对象是怎样被自动解析成 JSON 的吗？</p>
+</li>
+</ol>
+<h2 id="链接到-DynamoDB"><a href="#链接到-DynamoDB" class="headerlink" title="链接到 DynamoDB"></a>链接到 DynamoDB</h2><ol>
+<li><p>在这一章中要为 lambda 函数存取的数据添加持久层。我将会使用 Amazon DynamoDB（它跟 AWS lambda 结合得很出色，并且免费用量也不小）。如果你对 DynamoDB 不熟悉，<a href="https://www.tutorialspoint.com/dynamodb/dynamodb_overview.htm" target="_blank" rel="noopener">这儿</a>有一个不错的基本纲要。</p>
+<p>首先要创建一张 <code>Books</code> 表来保存 book 记录。DynanmoDB 是没有 schema 的，但我们需要在 ISBN 字段上定义分区键（有点像主键）。我们只需用以下这个命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">$ aws dynamodb create-table --table-name Books \</span><br><span class="line">--attribute-definitions AttributeName=ISBN,AttributeType=S \</span><br><span class="line">--key-schema AttributeName=ISBN,KeyType=HASH \</span><br><span class="line">--provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5</span><br><span class="line">&#123;</span><br><span class="line">    &quot;TableDescription&quot;: &#123;</span><br><span class="line">        &quot;AttributeDefinitions&quot;: [</span><br><span class="line">            &#123;</span><br><span class="line">                &quot;AttributeName&quot;: &quot;ISBN&quot;,</span><br><span class="line">                &quot;AttributeType&quot;: &quot;S&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">        &quot;TableName&quot;: &quot;Books&quot;,</span><br><span class="line">        &quot;KeySchema&quot;: [</span><br><span class="line">            &#123;</span><br><span class="line">                &quot;AttributeName&quot;: &quot;ISBN&quot;,</span><br><span class="line">                &quot;KeyType&quot;: &quot;HASH&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">        &quot;TableStatus&quot;: &quot;CREATING&quot;,</span><br><span class="line">        &quot;CreationDateTime&quot;: 1522924177.507,</span><br><span class="line">        &quot;ProvisionedThroughput&quot;: &#123;</span><br><span class="line">            &quot;NumberOfDecreasesToday&quot;: 0,</span><br><span class="line">            &quot;ReadCapacityUnits&quot;: 5,</span><br><span class="line">            &quot;WriteCapacityUnits&quot;: 5</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;TableSizeBytes&quot;: 0,</span><br><span class="line">        &quot;ItemCount&quot;: 0,</span><br><span class="line">        &quot;TableArn&quot;: &quot;arn:aws:dynamodb:us-east-1:account-id:table/Books&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>然后用 <code>put-item</code> 命令添加一些数据，这些数据在接下来几步中会用得到。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ aws dynamodb put-item --table-name Books --item &apos;&#123;&quot;ISBN&quot;: &#123;&quot;S&quot;: &quot;978-1420931693&quot;&#125;, &quot;Title&quot;: &#123;&quot;S&quot;: &quot;The Republic&quot;&#125;, &quot;Author&quot;:  &#123;&quot;S&quot;: &quot;Plato&quot;&#125;&#125;&apos;</span><br><span class="line">$ aws dynamodb put-item --table-name Books --item &apos;&#123;&quot;ISBN&quot;: &#123;&quot;S&quot;: &quot;978-0486298238&quot;&#125;, &quot;Title&quot;: &#123;&quot;S&quot;: &quot;Meditations&quot;&#125;,  &quot;Author&quot;:  &#123;&quot;S&quot;: &quot;Marcus Aurelius&quot;&#125;&#125;&apos;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>接下来更新我们的 Go 代码，这样我们的 lambda 处理程序可以连接并使用 DynamoDB 层。你需要安装 <code>github.com/aws/aws-sdk-go</code> 包，它提供了使用 DynamoDB（和其它 AWS 服务）的相关库。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ go get github.com/aws/aws-sdk-go</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>接着是敲代码环节。为了保持代码分离，在 <code>books</code> 仓库中创建一个新的 <code>db.go</code> 文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ touch ~/go/src/books/db.go</span><br></pre></td></tr></table></figure>
+
+<p>并添加以下代码：</p>
+<p>文件：books/db.go</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"github.com/aws/aws-sdk-go/aws"</span></span><br><span class="line">    <span class="string">"github.com/aws/aws-sdk-go/aws/session"</span></span><br><span class="line">    <span class="string">"github.com/aws/aws-sdk-go/service/dynamodb"</span></span><br><span class="line">    <span class="string">"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 声明一个新的 DynamoDB 实例。注意它在并发调用时是</span></span><br><span class="line"><span class="comment">// 安全的。</span></span><br><span class="line"><span class="keyword">var</span> db = dynamodb.New(session.New(), aws.NewConfig().WithRegion(<span class="string">"us-east-1"</span>))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getItem</span><span class="params">(isbn <span class="keyword">string</span>)</span> <span class="params">(*book, error)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 准备查询的输入</span></span><br><span class="line">    input := &amp;dynamodb.GetItemInput&#123;</span><br><span class="line">        TableName: aws.String(<span class="string">"Books"</span>),</span><br><span class="line">        Key: <span class="keyword">map</span>[<span class="keyword">string</span>]*dynamodb.AttributeValue&#123;</span><br><span class="line">            <span class="string">"ISBN"</span>: &#123;</span><br><span class="line">                S: aws.String(isbn),</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从 DynamoDB 检索数据。如果没有符合的数据</span></span><br><span class="line">    <span class="comment">// 返回 nil。</span></span><br><span class="line">    result, err := db.GetItem(input)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> result.Item == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回的 result.Item 对象具有隐含的</span></span><br><span class="line">    <span class="comment">// map[string]*AttributeValue 类型。我们可以使用 UnmarshalMap helper</span></span><br><span class="line">    <span class="comment">// 解析成对应的数据结构。注意：</span></span><br><span class="line">    <span class="comment">// 当你需要处理多条数据时，可以使用</span></span><br><span class="line">    <span class="comment">// UnmarshalListOfMaps。</span></span><br><span class="line">    bk := <span class="built_in">new</span>(book)</span><br><span class="line">    err = dynamodbattribute.UnmarshalMap(result.Item, bk)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> bk, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后用新的代码更新 <code>main.go</code>：</p>
+<p>文件：books/main.go</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"github.com/aws/aws-lambda-go/lambda"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> book <span class="keyword">struct</span> &#123;</span><br><span class="line">    ISBN   <span class="keyword">string</span> <span class="string">`json:"isbn"`</span></span><br><span class="line">    Title  <span class="keyword">string</span> <span class="string">`json:"title"`</span></span><br><span class="line">    Author <span class="keyword">string</span> <span class="string">`json:"author"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">show</span><span class="params">()</span> <span class="params">(*book, error)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 从 DynamoDB 数据库获取特定的 book 记录。在下一章中，</span></span><br><span class="line">    <span class="comment">// 我们可以让这个行为更加动态。</span></span><br><span class="line">    bk, err := getItem(<span class="string">"978-0486298238"</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> bk, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    lambda.Start(show)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>保存文件、重新编译并打包压缩 lambda 函数，这样就做好了部署前的准备：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ env GOOS=linux GOARCH=amd64 go build -o /tmp/main books</span><br><span class="line">$ zip -j /tmp/main.zip /tmp/main</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>重新部署一个 lambda 函数比第一次创建轻松多了 —— 我们可以像这样使用 <code>aws lambda update-function-code</code> 命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ aws lambda update-function-code --function-name books \</span><br><span class="line">--zip-file fileb:///tmp/main.zip</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>试着执行 lambda 函数看看：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ aws lambda invoke --function-name books /tmp/output.json</span><br><span class="line">&#123;</span><br><span class="line">    &quot;StatusCode&quot;: 200,</span><br><span class="line">    &quot;FunctionError&quot;: &quot;Unhandled&quot;</span><br><span class="line">&#125;</span><br><span class="line">$ cat /tmp/output.json</span><br><span class="line">&#123;&quot;errorMessage&quot;:&quot;AccessDeniedException: User: arn:aws:sts::account-id:assumed-role/lambda-books-executor/books is not authorized to perform: dynamodb:GetItem on resource: arn:aws:dynamodb:us-east-1:account-id:table/Books\n\tstatus code: 400, request id: 2QSB5UUST6F0R3UDSVVVODTES3VV4KQNSO5AEMVJF66Q9ASUAAJG&quot;,&quot;errorType&quot;:&quot;requestError&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>啊，有点小问题。我们可以从输出信息中看到，我们的 lambda 函数（注意了，用的 <code>lambda-books-executor</code> 角色）缺少在 DynamoDB 实例上运行 <code>GetItem</code> 的权限。我们现在就把它改过来。</p>
+</li>
+<li><p>创建一个权限策略文件，给予 <code>GetItem</code> 和 <code>PutItem</code> DynamoDB 相关的权限：</p>
+<p>文件：/tmp/privilege-policy.json</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;Version&quot;: &quot;2012-10-17&quot;,</span><br><span class="line">    &quot;Statement&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;Effect&quot;: &quot;Allow&quot;,</span><br><span class="line">            &quot;Action&quot;: [</span><br><span class="line">                &quot;dynamodb:PutItem&quot;,</span><br><span class="line">                &quot;dynamodb:GetItem&quot;,</span><br><span class="line">            ],</span><br><span class="line">            &quot;Resource&quot;: &quot;*&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后使用 <code>aws iam put-role-policy</code> 命令把它附加到 <code>lambda-books-executor</code> 用户：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ aws iam put-role-policy --role-name lambda-books-executor \</span><br><span class="line">--policy-name dynamodb-item-crud-role \</span><br><span class="line">--policy-document file:///tmp/privilege-policy.json</span><br></pre></td></tr></table></figure>
+
+<p>讲句题外话，AWS 有叫做 <code>AWSLambdaDynamoDBExecutionRole</code> 和 <code>AWSLambdaInvocation-DynamoDB</code> 的托管策略，听起来挺管用的，但是它们都不提供 <code>GetItem</code> 或 <code>PutItem</code> 的权限。所以才需要组建自己的策略。</p>
+</li>
+<li><p>再执行一次 lambda 函数看看。这一次应该顺利执行了并返回 ISBN 为 <code>978-0486298238</code> 的书本的信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ aws lambda invoke --function-name books /tmp/output.json</span><br><span class="line">&#123;</span><br><span class="line">    &quot;StatusCode&quot;: 200</span><br><span class="line">&#125;</span><br><span class="line">$ cat /tmp/output.json</span><br><span class="line">&#123;&quot;isbn&quot;:&quot;978-0486298238&quot;,&quot;title&quot;:&quot;Meditations&quot;,&quot;author&quot;:&quot;Marcus Aurelius&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h2 id="构建-HTTPS-API"><a href="#构建-HTTPS-API" class="headerlink" title="构建 HTTPS API"></a>构建 HTTPS API</h2><ol>
+<li><p>到现在为止，我们的 lambda 已经能够运行并与 DynamoDB 交互。接下来就是建立一个通过 HTTPS 获取 lamdba 函数的途径，我们可以通过 AWS API 网关服务来实现。</p>
+<p>但是在我们继续之前，考虑一下项目的架构还是很有必要的。假设我们有一个宏伟的计划，我们的 lamdba 函数将是一个更大的 <code>bookstore</code> API 的一部分，这个API 将会处理书本、客户、推荐和其它各种各样的信息。</p>
+<p>AWS Lambda 提供了三种架构的基本选项：</p>
+<ul>
+<li><strong>微服务式</strong> —— 每个 lambda 函数只响应一个行为。举个例子，展示、创建和删除一本书会对应 3 个独立的 lambda 函数。</li>
+<li><strong>服务式</strong> —— 每个 lambda 函数响应一组相关的行为。举个例子， 用一个 lambda 来处理所有跟书相关的行为，但是用户相关行为会被放到另一个独立的 lambda 函数中。</li>
+<li><strong>整体式</strong> —— 一个 lambda 函数管理书店的所有行为。</li>
+</ul>
+<p>每个选项都是有效的，<a href="https://serverless.com/blog/serverless-architecture-code-patterns/" target="_blank" rel="noopener">这里</a>有一些关于每个选项优缺点的不错的讨论。</p>
+<p>在这篇教程中我们会用服务式进行操作，并用一个 <code>books</code> lambda 函数处理不同的书本相关行为。这意味着我们需要在我们的 lambda 函数<strong>内部</strong>实现某种形式的路由，这一点我会在下文提到。不过现在……</p>
+</li>
+<li><p>我们继续，使用 <code>aws apigateway create-rest-api</code> 创建一个 <code>bookstore</code> API：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ aws apigateway create-rest-api --name bookstore</span><br><span class="line">&#123;</span><br><span class="line">    &quot;id&quot;: &quot;rest-api-id&quot;,</span><br><span class="line">    &quot;name&quot;: &quot;bookstore&quot;,</span><br><span class="line">    &quot;createdDate&quot;: 1522926250</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>记录下返回的 <code>rest-api-id</code> 值，我们在接下来几步中会多次用到它。</p>
+</li>
+<li><p>接下来我们需要获取 API 根目录（<code>&quot;/&quot;</code>）的 id。我们可以使用 <code>aws apigateway get-resources</code> 命令来取得：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ aws apigateway get-resources --rest-api-id rest-api-id</span><br><span class="line">&#123;</span><br><span class="line">    &quot;items&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;id&quot;: &quot;root-path-id&quot;,</span><br><span class="line">            &quot;path&quot;: &quot;/&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样地，记录返回的 <code>root-path-id</code> 值。</p>
+</li>
+<li><p>现在我们需要<strong>在根目录下</strong>创建一个新的资源 —— 就是 URL 路径 <code>/books</code> 对应的资源。我们可以使用带有 <code>--path-part</code> 参数的 <code>aws apigateway create-resource</code> 命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ aws apigateway create-resource --rest-api-id rest-api-id \</span><br><span class="line">--parent-id root-path-id --path-part books</span><br><span class="line">&#123;</span><br><span class="line">    &quot;id&quot;: &quot;resource-id&quot;,</span><br><span class="line">    &quot;parentId&quot;: &quot;root-path-id&quot;,</span><br><span class="line">    &quot;pathPart&quot;: &quot;books&quot;,</span><br><span class="line">    &quot;path&quot;: &quot;/books&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样地，记录返回的 <code>resource-id</code>，下一步要用到。</p>
+<p>值得一提的是，可以使用大括号将部分路径包裹起来来在路径中包含占位符。举个例子，<code>books/{id}</code> 的 <code>--path-part</code> 参数将会匹配 <code>/books/foo</code> 和 <code>/books/bar</code> 的请求，并且 <code>id</code> 的值可以通过一个事件对象（下文会提到）在你的 lambda 函数中获取。你也可以在占位符后加上后缀 <code>+</code>，使它变得贪婪。如果你想匹配任意路径的请求，一种常见的做法是使用参数 <code>--path-part {proxy+}</code>。</p>
+</li>
+<li><p>不过我们不用这么做。我们回到 <code>/books</code> 资源，使用 <code>aws apigateway put-method</code> 命令来注册 <code>ANY</code> 的 HTTP 方法。这意味着我们的 <code>/books</code> 将会响应所有请求，不论什么 HTTP 方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ aws apigateway put-method --rest-api-id rest-api-id \</span><br><span class="line">--resource-id resource-id --http-method ANY \</span><br><span class="line">--authorization-type NONE</span><br><span class="line">&#123;</span><br><span class="line">    &quot;httpMethod&quot;: &quot;ANY&quot;,</span><br><span class="line">    &quot;authorizationType&quot;: &quot;NONE&quot;,</span><br><span class="line">    &quot;apiKeyRequired&quot;: false</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>现在万事俱备，就差把资源整合到我们的 lambda 函数中了，这一步我们使用 <code>aws apigateway put-integration</code> 命令。关于这个命令的一些参数需要简短地解释一下：</p>
+<ul>
+<li><p>The <code>--type</code> 参数应该为 <code>AWS_PROXY</code>。当使用这个值时，AWS API 网关会以 『事件』的形式将 HTTP 请求的信息发送到 lambda 函数。这也会自动将 lambda 函数的输出转化成 HTTP 响应。</p>
+</li>
+<li><p><code>--integration-http-method</code> 参数必须为 <code>POST</code>。不要把这个和你的  API 资源响应的 HTTP 方法混淆了。</p>
+</li>
+<li><p><code>--uri</code> 参数需要遵守这样的格式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/your-lambda-function-arn/invocations</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>记住了这些以后，你的命令看起来应该是这样的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ aws apigateway put-integration --rest-api-id rest-api-id \</span><br><span class="line">--resource-id resource-id --http-method ANY --type AWS_PROXY \</span><br><span class="line">--integration-http-method POST \</span><br><span class="line">--uri arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:account-id:function:books/invocations</span><br><span class="line">&#123;</span><br><span class="line">    &quot;type&quot;: &quot;AWS_PROXY&quot;,</span><br><span class="line">    &quot;httpMethod&quot;: &quot;POST&quot;,</span><br><span class="line">    &quot;uri&quot;: &quot;arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:account-id:function:books/invocations&quot;,</span><br><span class="line">    &quot;passthroughBehavior&quot;: &quot;WHEN_NO_MATCH&quot;,</span><br><span class="line">    &quot;cacheNamespace&quot;: &quot;qtdn5h&quot;,</span><br><span class="line">    &quot;cacheKeyParameters&quot;: []</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>好了，我们来试一试。我们可以使用 <code>aws apigateway test-invoke-method</code> 命令来向我们刚才建立的资源发送一个测试请求：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ aws apigateway test-invoke-method --rest-api-id rest-api-id --resource-id resource-id --http-method &quot;GET&quot;</span><br><span class="line">&#123;</span><br><span class="line">    &quot;status&quot;: 500,</span><br><span class="line">    &quot;body&quot;: &quot;&#123;\&quot;message\&quot;: \&quot;Internal server error\&quot;&#125;&quot;,</span><br><span class="line">    &quot;headers&quot;: &#123;&#125;,</span><br><span class="line">    &quot;log&quot;: &quot;Execution log for request test-request\nThu Apr 05 11:07:54 UTC 2018 : Starting execution for request: test-invoke-request\nThu Apr 05 11:07:54 UTC 2018 : HTTP Method: GET, Resource Path: /books\nThu Apr 05 11:07:54 UTC 2018 : Method request path: &#123;&#125;[TRUNCATED]Thu Apr 05 11:07:54 UTC 2018 : Sending request to https://lambda.us-east-1.amazonaws.com/2015-03-31/functions/arn:aws:lambda:us-east-1:account-id:function:books/invocations\nThu Apr 05 11:07:54 UTC 2018 : Execution failed due to configuration error: Invalid permissions on Lambda function\nThu Apr 05 11:07:54 UTC 2018 : Method completed with status: 500\n&quot;,</span><br><span class="line">    &quot;latency&quot;: 39</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>啊，没有成功。如果你浏览了输出的日志，你应该可以看出问题出在这儿：</p>
+<p><code>Execution failed due to configuration error: Invalid permissions on Lambda function</code></p>
+<p>这是因为我们的 <code>bookstore</code> API 网关<strong>没有执行 lambda 函数的权限</strong>。</p>
+</li>
+<li><p>最简单的修复问题的方法是使用 <code>aws lambda add-permission</code> 命令来给 API 调用的权限，像这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ aws lambda add-permission --function-name books --statement-id a-GUID \</span><br><span class="line">--action lambda:InvokeFunction --principal apigateway.amazonaws.com \</span><br><span class="line">--source-arn arn:aws:execute-api:us-east-1:account-id:rest-api-id/*/*/*</span><br><span class="line">&#123;</span><br><span class="line">    &quot;Statement&quot;: &quot;&#123;\&quot;Sid\&quot;:\&quot;6d658ce7-3899-4de2-bfd4-fefb939f731\&quot;,\&quot;Effect\&quot;:\&quot;Allow\&quot;,\&quot;Principal\&quot;:&#123;\&quot;Service\&quot;:\&quot;apigateway.amazonaws.com\&quot;&#125;,\&quot;Action\&quot;:\&quot;lambda:InvokeFunction\&quot;,\&quot;Resource\&quot;:\&quot;arn:aws:lambda:us-east-1:account-id:function:books\&quot;,\&quot;Condition\&quot;:&#123;\&quot;ArnLike\&quot;:&#123;\&quot;AWS:SourceArn\&quot;:\&quot;arn:aws:execute-api:us-east-1:account-id:rest-api-id/*/*/*\&quot;&#125;&#125;&#125;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意，<code>--statement-id</code> 参数必须是一个全局唯一的标识符。它可以是一个 <a href="https://www.guidgenerator.com/" target="_blank" rel="noopener">random ID</a> 或其它更加容易说明的值。</p>
+</li>
+<li><p>好了，再试一次：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ aws apigateway test-invoke-method --rest-api-id rest-api-id --resource-id resource-id --http-method &quot;GET&quot;</span><br><span class="line">&#123;</span><br><span class="line">    &quot;status&quot;: 502,</span><br><span class="line">    &quot;body&quot;: &quot;&#123;\&quot;message\&quot;: \&quot;Internal server error\&quot;&#125;&quot;,</span><br><span class="line">    &quot;headers&quot;: &#123;&#125;,</span><br><span class="line">    &quot;log&quot;: &quot;Execution log for request test-request\nThu Apr 05 11:12:53 UTC 2018 : Starting execution for request: test-invoke-request\nThu Apr 05 11:12:53 UTC 2018 : HTTP Method: GET, Resource Path: /books\nThu Apr 05 11:12:53 UTC 2018 : Method request path: &#123;&#125;\nThu Apr 05 11:12:53 UTC 2018 : Method request query string: &#123;&#125;\nThu Apr 05 11:12:53 UTC 2018 : Method request headers: &#123;&#125;\nThu Apr 05 11:12:53 UTC 2018 : Endpoint response body before transformations: &#123;\&quot;isbn\&quot;:\&quot;978-0486298238\&quot;,\&quot;title\&quot;:\&quot;Meditations\&quot;,\&quot;author\&quot;:\&quot;Marcus Aurelius\&quot;&#125;\nThu Apr 05 11:12:53 UTC 2018 : Endpoint response headers: &#123;X-Amz-Executed-Version=$LATEST, x-amzn-Remapped-Content-Length=0, Connection=keep-alive, x-amzn-RequestId=48d29098-38c2-11e8-ae15-f13b670c5483, Content-Length=74, Date=Thu, 05 Apr 2018 11:12:53 GMT, X-Amzn-Trace-Id=root=1-5ac604b5-cf29dd70cd08358f89853b96;sampled=0, Content-Type=application/json&#125;\nThu Apr 05 11:12:53 UTC 2018 : Execution failed due to configuration error: Malformed Lambda proxy response\nThu Apr 05 11:12:53 UTC 2018 : Method completed with status: 502\n&quot;,</span><br><span class="line">    &quot;latency&quot;: 211</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还是报错，不过消息已经变了：</p>
+<p><code>Execution failed due to configuration error: Malformed Lambda proxy response</code></p>
+<p>如果你仔细看输出你会看到下列信息：</p>
+<p><code>Endpoint response body before transformations: {\&quot;isbn\&quot;:\&quot;978-0486298238\&quot;,\&quot;title\&quot;:\&quot;Meditations\&quot;,\&quot;author\&quot;:\&quot;Marcus Aurelius\&quot;}</code></p>
+<p>这里有明确的过程。API 和 lambda 函数交互并收到了正确的响应（一个解析成 JSON 的 <code>book</code> 对象）。只是 AWS API 网关将响应当成了错误的格式。</p>
+<p>这是因为，当你使用 API 网关的 lambda 代理集成，lambda 函数的返回值 <strong>必须</strong> 是这样的 JSON 格式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;isBase64Encoded&quot;: true|false,</span><br><span class="line">    &quot;statusCode&quot;: httpStatusCode,</span><br><span class="line">    &quot;headers&quot;: &#123; &quot;headerName&quot;: &quot;headerValue&quot;, ... &#125;,</span><br><span class="line">    &quot;body&quot;: &quot;...&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是时候回头看看 Go 代码，然后做些转换了。</p>
+</li>
+</ol>
+<h2 id="处理事件"><a href="#处理事件" class="headerlink" title="处理事件"></a>处理事件</h2><ol>
+<li><p>提供 AWS API 网关需要的响应最简单的方法是安装 <code>github.com/aws/aws-lambda-go/events</code> 包：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get github.com/aws/aws-lambda-go/events</span><br></pre></td></tr></table></figure>
+
+<p>这个包提供了许多有用的类型（<code>APIGatewayProxyRequest</code> 和 <code>APIGatewayProxyResponse</code>），包含了输入的 HTTP 请求的信息并允许我们构建 API 网关能够理解的响应.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> APIGatewayProxyRequest <span class="keyword">struct</span> &#123;</span><br><span class="line">    Resource              <span class="keyword">string</span>                        <span class="string">`json:"resource"`</span> <span class="comment">// API 网关中定义的资源路径</span></span><br><span class="line">    Path                  <span class="keyword">string</span>                        <span class="string">`json:"path"`</span>     <span class="comment">// 调用者的 url 路径</span></span><br><span class="line">    HTTPMethod            <span class="keyword">string</span>                        <span class="string">`json:"httpMethod"`</span></span><br><span class="line">    Headers               <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>             <span class="string">`json:"headers"`</span></span><br><span class="line">    QueryStringParameters <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>             <span class="string">`json:"queryStringParameters"`</span></span><br><span class="line">    PathParameters        <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>             <span class="string">`json:"pathParameters"`</span></span><br><span class="line">    StageVariables        <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>             <span class="string">`json:"stageVariables"`</span></span><br><span class="line">    RequestContext        APIGatewayProxyRequestContext <span class="string">`json:"requestContext"`</span></span><br><span class="line">    Body                  <span class="keyword">string</span>                        <span class="string">`json:"body"`</span></span><br><span class="line">    IsBase64Encoded       <span class="keyword">bool</span>                          <span class="string">`json:"isBase64Encoded,omitempty"`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> APIGatewayProxyResponse <span class="keyword">struct</span> &#123;</span><br><span class="line">    StatusCode      <span class="keyword">int</span>               <span class="string">`json:"statusCode"`</span></span><br><span class="line">    Headers         <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span> <span class="string">`json:"headers"`</span></span><br><span class="line">    Body            <span class="keyword">string</span>            <span class="string">`json:"body"`</span></span><br><span class="line">    IsBase64Encoded <span class="keyword">bool</span>              <span class="string">`json:"isBase64Encoded,omitempty"`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>回到 <code>main.go</code> 文件，更新 lambda 处理程序，让它使用这样的函数签名：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)</span><br></pre></td></tr></table></figure>
+
+<p>总的来讲，处理程序会接收一个包含了一串 HTTP 请求信息的 <code>APIGatewayProxyRequest</code> 对象，然后返回一个 <code>APIGatewayProxyResponse</code> 对象（可以被解析成适合 AWS API 网关的 JSON 响应）。</p>
+<p>文件：books/main.go</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"encoding/json"</span></span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"log"</span></span><br><span class="line">    <span class="string">"net/http"</span></span><br><span class="line">    <span class="string">"os"</span></span><br><span class="line">    <span class="string">"regexp"</span></span><br><span class="line"></span><br><span class="line">    <span class="string">"github.com/aws/aws-lambda-go/events"</span></span><br><span class="line">    <span class="string">"github.com/aws/aws-lambda-go/lambda"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> isbnRegexp = regexp.MustCompile(<span class="string">`[0-9]&#123;3&#125;\-[0-9]&#123;10&#125;`</span>)</span><br><span class="line"><span class="keyword">var</span> errorLogger = log.New(os.Stderr, <span class="string">"ERROR "</span>, log.Llongfile)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> book <span class="keyword">struct</span> &#123;</span><br><span class="line">    ISBN   <span class="keyword">string</span> <span class="string">`json:"isbn"`</span></span><br><span class="line">    Title  <span class="keyword">string</span> <span class="string">`json:"title"`</span></span><br><span class="line">    Author <span class="keyword">string</span> <span class="string">`json:"author"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">show</span><span class="params">(req events.APIGatewayProxyRequest)</span> <span class="params">(events.APIGatewayProxyResponse, error)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 从请求中获取查询 `isbn` 的字符串参数</span></span><br><span class="line">    <span class="comment">// 并校验。</span></span><br><span class="line">    isbn := req.QueryStringParameters[<span class="string">"isbn"</span>]</span><br><span class="line">    <span class="keyword">if</span> !isbnRegexp.MatchString(isbn) &#123;</span><br><span class="line">        <span class="keyword">return</span> clientError(http.StatusBadRequest)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据 isbn 值从数据库中取出 book 记录</span></span><br><span class="line">    bk, err := getItem(isbn)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> serverError(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> bk == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> clientError(http.StatusNotFound)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// APIGatewayProxyResponse.Body 域是个字符串，所以</span></span><br><span class="line">    <span class="comment">// 我们将 book 记录解析成 JSON。</span></span><br><span class="line">    js, err := json.Marshal(bk)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> serverError(err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回一个响应，带有代表成功的 200 状态码和 JSON 格式的 book 记录</span></span><br><span class="line">    <span class="comment">// 响应体。</span></span><br><span class="line">    <span class="keyword">return</span> events.APIGatewayProxyResponse&#123;</span><br><span class="line">        StatusCode: http.StatusOK,</span><br><span class="line">        Body:       <span class="keyword">string</span>(js),</span><br><span class="line">    &#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加一个用来处理错误的帮助函数。它会打印错误日志到 os.Stderr</span></span><br><span class="line"><span class="comment">// 并返回一个 AWS API 网关能够理解的 500 服务器内部错误</span></span><br><span class="line"><span class="comment">// 的响应。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">serverError</span><span class="params">(err error)</span> <span class="params">(events.APIGatewayProxyResponse, error)</span></span> &#123;</span><br><span class="line">    errorLogger.Println(err.Error())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> events.APIGatewayProxyResponse&#123;</span><br><span class="line">        StatusCode: http.StatusInternalServerError,</span><br><span class="line">        Body:       http.StatusText(http.StatusInternalServerError),</span><br><span class="line">    &#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 加一个简单的帮助函数，用来发送和客户端错误相关的响应。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">clientError</span><span class="params">(status <span class="keyword">int</span>)</span> <span class="params">(events.APIGatewayProxyResponse, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> events.APIGatewayProxyResponse&#123;</span><br><span class="line">        StatusCode: status,</span><br><span class="line">        Body:       http.StatusText(status),</span><br><span class="line">    &#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    lambda.Start(show)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意到为什么我们的 lambda 处理程序返回的所有 <code>error</code> 值变成了 <code>nil</code>？我们不得不这么做，因为 API 网关在和 lambda 代理集成插件结合使用时不接收 <code>error</code> 对象 （这些错误会再一次引起『响应残缺』错误）。所以我们需要在 lambda 函数里自己管理错误，并返回合适的 HTTP 响应。其实 <code>error</code> 这个返回参数是多余的，但是为了保持正确的函数签名，我们还是要在 lambda 函数里包含它。</p>
+</li>
+<li><p>保存文件，重新编译并重新部署 lambda 函数：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ env GOOS=linux GOARCH=amd64 go build -o /tmp/main books</span><br><span class="line">$ zip -j /tmp/main.zip /tmp/main</span><br><span class="line">$ aws lambda update-function-code --function-name books \</span><br><span class="line">--zip-file fileb:///tmp/main.zip</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>再试一次，结果应该符合预期了。试试在查询字符串中输入不同的 <code>isbn</code> 值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">$ aws apigateway test-invoke-method --rest-api-id rest-api-id \</span><br><span class="line">--resource-id resource-id --http-method &quot;GET&quot; \</span><br><span class="line">--path-with-query-string &quot;/books?isbn=978-1420931693&quot;</span><br><span class="line">&#123;</span><br><span class="line">    &quot;status&quot;: 200,</span><br><span class="line">    &quot;body&quot;: &quot;&#123;\&quot;isbn\&quot;:\&quot;978-1420931693\&quot;,\&quot;title\&quot;:\&quot;The Republic\&quot;,\&quot;author\&quot;:\&quot;Plato\&quot;&#125;&quot;,</span><br><span class="line">    &quot;headers&quot;: &#123;</span><br><span class="line">        &quot;X-Amzn-Trace-Id&quot;: &quot;sampled=0;root=1-5ac60df0-0ea7a560337129d1fde588cd&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;log&quot;: [TRUNCATED],</span><br><span class="line">    &quot;latency&quot;: 1232</span><br><span class="line">&#125;</span><br><span class="line">$ aws apigateway test-invoke-method --rest-api-id rest-api-id \</span><br><span class="line">--resource-id resource-id --http-method &quot;GET&quot; \</span><br><span class="line">--path-with-query-string &quot;/books?isbn=foobar&quot;</span><br><span class="line">&#123;</span><br><span class="line">    &quot;status&quot;: 400,</span><br><span class="line">    &quot;body&quot;: &quot;Bad Request&quot;,</span><br><span class="line">    &quot;headers&quot;: &#123;</span><br><span class="line">        &quot;X-Amzn-Trace-Id&quot;: &quot;sampled=0;root=1-5ac60e1c-72fad7cfa302fd32b0a6c702&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;log&quot;: [TRUNCATED],</span><br><span class="line">    &quot;latency&quot;: 25</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>插句题外话，所有发送到 <code>os.Stderr</code> 的信息会被打印到 AWS 云监控服务。所以如果你像上面的代码一样建立了一个错误日志器，你可以像这样在云监控上查询错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ aws logs filter-log-events --log-group-name /aws/lambda/books \</span><br><span class="line">--filter-pattern &quot;ERROR&quot;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h2 id="部署-API"><a href="#部署-API" class="headerlink" title="部署 API"></a>部署 API</h2><ol>
+<li><p>既然 API 能够正常工作了，是时候将它上线了。我们可以执行这个 <code>aws apigateway create-deployment</code> 命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ aws apigateway create-deployment --rest-api-id rest-api-id \</span><br><span class="line">--stage-name staging</span><br><span class="line">&#123;</span><br><span class="line">    &quot;id&quot;: &quot;4pdblq&quot;,</span><br><span class="line">    &quot;createdDate&quot;: 1522929303</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上面的代码中我给 API 命名为 <code>staging</code>，你也可以按你的喜好来给它起名。</p>
+</li>
+<li><p>部署以后你的 API 可以通过 URL 被访问：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://rest-api-id.execute-api.us-east-1.amazonaws.com/staging</span><br></pre></td></tr></table></figure>
+
+<p>用 curl 来试一试。它的结果应该跟预想中一样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ curl https://rest-api-id.execute-api.us-east-1.amazonaws.com/staging/books?isbn=978-1420931693</span><br><span class="line">&#123;&quot;isbn&quot;:&quot;978-1420931693&quot;,&quot;title&quot;:&quot;The Republic&quot;,&quot;author&quot;:&quot;Plato&quot;&#125;</span><br><span class="line">$ curl https://rest-api-id.execute-api.us-east-1.amazonaws.com/staging/books?isbn=foobar</span><br><span class="line">Bad Request</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h2 id="支持多种行为"><a href="#支持多种行为" class="headerlink" title="支持多种行为"></a>支持多种行为</h2><ol>
+<li><p>我们来为 <code>POST /books</code> 行为添加支持。我们希望它能读取并校验一条新的 book 记录（从 JSON 格式的 HTTP 请求体中），然后把它添加到 DynamoDB 表中。</p>
+<p>既然不同的 AWS 服务已经联通，扩展我们的 lambda 函数来支持附加的行为可能是这个教程最简单的部分了，因为这可以仅通过 Go 代码实现。</p>
+<p>首先更新 <code>db.go</code> 文件，添加一个 <code>putItem</code> 函数：</p>
+<p>文件：books/db.go</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"github.com/aws/aws-sdk-go/aws"</span></span><br><span class="line">    <span class="string">"github.com/aws/aws-sdk-go/aws/session"</span></span><br><span class="line">    <span class="string">"github.com/aws/aws-sdk-go/service/dynamodb"</span></span><br><span class="line">    <span class="string">"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> db = dynamodb.New(session.New(), aws.NewConfig().WithRegion(<span class="string">"us-east-1"</span>))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getItem</span><span class="params">(isbn <span class="keyword">string</span>)</span> <span class="params">(*book, error)</span></span> &#123;</span><br><span class="line">    input := &amp;dynamodb.GetItemInput&#123;</span><br><span class="line">        TableName: aws.String(<span class="string">"Books"</span>),</span><br><span class="line">        Key: <span class="keyword">map</span>[<span class="keyword">string</span>]*dynamodb.AttributeValue&#123;</span><br><span class="line">            <span class="string">"ISBN"</span>: &#123;</span><br><span class="line">                S: aws.String(isbn),</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    result, err := db.GetItem(input)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> result.Item == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    bk := <span class="built_in">new</span>(book)</span><br><span class="line">    err = dynamodbattribute.UnmarshalMap(result.Item, bk)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> bk, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加一条 book 记录到 DynamoDB。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">putItem</span><span class="params">(bk *book)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    input := &amp;dynamodb.PutItemInput&#123;</span><br><span class="line">        TableName: aws.String(<span class="string">"Books"</span>),</span><br><span class="line">        Item: <span class="keyword">map</span>[<span class="keyword">string</span>]*dynamodb.AttributeValue&#123;</span><br><span class="line">            <span class="string">"ISBN"</span>: &#123;</span><br><span class="line">                S: aws.String(bk.ISBN),</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"Title"</span>: &#123;</span><br><span class="line">                S: aws.String(bk.Title),</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"Author"</span>: &#123;</span><br><span class="line">                S: aws.String(bk.Author),</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _, err := db.PutItem(input)</span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后修改 <code>main.go</code> 函数，这样 <code>lambda.Start()</code> 方法会调用一个新的 <code>router</code> 函数，根据 HTTP 请求的方法决定哪个行为被调用：</p>
+<p>文件：books/main.go</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"encoding/json"</span></span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"log"</span></span><br><span class="line">    <span class="string">"net/http"</span></span><br><span class="line">    <span class="string">"os"</span></span><br><span class="line">    <span class="string">"regexp"</span></span><br><span class="line"></span><br><span class="line">    <span class="string">"github.com/aws/aws-lambda-go/events"</span></span><br><span class="line">    <span class="string">"github.com/aws/aws-lambda-go/lambda"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> isbnRegexp = regexp.MustCompile(<span class="string">`[0-9]&#123;3&#125;\-[0-9]&#123;10&#125;`</span>)</span><br><span class="line"><span class="keyword">var</span> errorLogger = log.New(os.Stderr, <span class="string">"ERROR "</span>, log.Llongfile)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> book <span class="keyword">struct</span> &#123;</span><br><span class="line">    ISBN   <span class="keyword">string</span> <span class="string">`json:"isbn"`</span></span><br><span class="line">    Title  <span class="keyword">string</span> <span class="string">`json:"title"`</span></span><br><span class="line">    Author <span class="keyword">string</span> <span class="string">`json:"author"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">router</span><span class="params">(req events.APIGatewayProxyRequest)</span> <span class="params">(events.APIGatewayProxyResponse, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">switch</span> req.HTTPMethod &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">"GET"</span>:</span><br><span class="line">        <span class="keyword">return</span> show(req)</span><br><span class="line">    <span class="keyword">case</span> <span class="string">"POST"</span>:</span><br><span class="line">        <span class="keyword">return</span> create(req)</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">return</span> clientError(http.StatusMethodNotAllowed)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">show</span><span class="params">(req events.APIGatewayProxyRequest)</span> <span class="params">(events.APIGatewayProxyResponse, error)</span></span> &#123;</span><br><span class="line">    isbn := req.QueryStringParameters[<span class="string">"isbn"</span>]</span><br><span class="line">    <span class="keyword">if</span> !isbnRegexp.MatchString(isbn) &#123;</span><br><span class="line">        <span class="keyword">return</span> clientError(http.StatusBadRequest)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    bk, err := getItem(isbn)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> serverError(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> bk == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> clientError(http.StatusNotFound)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    js, err := json.Marshal(bk)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> serverError(err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> events.APIGatewayProxyResponse&#123;</span><br><span class="line">        StatusCode: http.StatusOK,</span><br><span class="line">        Body:       <span class="keyword">string</span>(js),</span><br><span class="line">    &#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">create</span><span class="params">(req events.APIGatewayProxyRequest)</span> <span class="params">(events.APIGatewayProxyResponse, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> req.Headers[<span class="string">"Content-Type"</span>] != <span class="string">"application/json"</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> clientError(http.StatusNotAcceptable)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    bk := <span class="built_in">new</span>(book)</span><br><span class="line">    err := json.Unmarshal([]<span class="keyword">byte</span>(req.Body), bk)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> clientError(http.StatusUnprocessableEntity)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> !isbnRegexp.MatchString(bk.ISBN) &#123;</span><br><span class="line">        <span class="keyword">return</span> clientError(http.StatusBadRequest)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> bk.Title == <span class="string">""</span> || bk.Author == <span class="string">""</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> clientError(http.StatusBadRequest)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    err = putItem(bk)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> serverError(err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> events.APIGatewayProxyResponse&#123;</span><br><span class="line">        StatusCode: <span class="number">201</span>,</span><br><span class="line">        Headers:    <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;<span class="string">"Location"</span>: fmt.Sprintf(<span class="string">"/books?isbn=%s"</span>, bk.ISBN)&#125;,</span><br><span class="line">    &#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">serverError</span><span class="params">(err error)</span> <span class="params">(events.APIGatewayProxyResponse, error)</span></span> &#123;</span><br><span class="line">    errorLogger.Println(err.Error())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> events.APIGatewayProxyResponse&#123;</span><br><span class="line">        StatusCode: http.StatusInternalServerError,</span><br><span class="line">        Body:       http.StatusText(http.StatusInternalServerError),</span><br><span class="line">    &#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">clientError</span><span class="params">(status <span class="keyword">int</span>)</span> <span class="params">(events.APIGatewayProxyResponse, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> events.APIGatewayProxyResponse&#123;</span><br><span class="line">        StatusCode: status,</span><br><span class="line">        Body:       http.StatusText(status),</span><br><span class="line">    &#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    lambda.Start(router)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>重新编译、打包 lambda 函数，然后像平常一样部署它：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ env GOOS=linux GOARCH=amd64 go build -o /tmp/main books</span><br><span class="line">$ zip -j /tmp/main.zip /tmp/main</span><br><span class="line">$ aws lambda update-function-code --function-name books \</span><br><span class="line">--zip-file fileb:///tmp/main.zip</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>现在当你用不同的 HTTP 方法访问 API 时，它应该调用合适的方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ curl -i -H &quot;Content-Type: application/json&quot; -X POST \</span><br><span class="line">-d &apos;&#123;&quot;isbn&quot;:&quot;978-0141439587&quot;, &quot;title&quot;:&quot;Emma&quot;, &quot;author&quot;: &quot;Jane Austen&quot;&#125;&apos; \</span><br><span class="line">https://rest-api-id.execeast-1.amazonaws.com/staging/books</span><br><span class="line">HTTP/1.1 201 Created</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 7</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Date: Thu, 05 Apr 2018 14:55:34 GMT</span><br><span class="line">x-amzn-RequestId: 64262aa3-38e1-11e8-825c-d7cfe4d1e7d0</span><br><span class="line">x-amz-apigw-id: E33T1E3eIAMF9dw=</span><br><span class="line">Location: /books?isbn=978-0141439587</span><br><span class="line">X-Amzn-Trace-Id: sampled=0;root=1-5ac638e5-e806a84761839bc24e234c37</span><br><span class="line">X-Cache: Miss from cloudfront</span><br><span class="line">Via: 1.1 a22ee9ab15c998bce94f1f4d2a7792ee.cloudfront.net (CloudFront)</span><br><span class="line">X-Amz-Cf-Id: wSef_GJ70YB2-0VSwhUTS9x-ATB1Yq8anWuzV_PRN98k9-DkD7FOAA==</span><br><span class="line"></span><br><span class="line">$ curl https://rest-api-id.execute-api.us-east-1.amazonaws.com/staging/books?isbn=978-0141439587</span><br><span class="line">&#123;&quot;isbn&quot;:&quot;978-0141439587&quot;,&quot;title&quot;:&quot;Emma&quot;,&quot;author&quot;:&quot;Jane Austen&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<hr>
+<blockquote>
+<p><a href="https://github.com/xitu/gold-miner" target="_blank" rel="noopener">掘金翻译计划</a> 是一个翻译优质互联网技术文章的社区，文章来源为 <a href="https://juejin.im" target="_blank" rel="noopener">掘金</a> 上的英文分享文章。内容覆盖 <a href="https://github.com/xitu/gold-miner#android" target="_blank" rel="noopener">Android</a>、<a href="https://github.com/xitu/gold-miner#ios" target="_blank" rel="noopener">iOS</a>、<a href="https://github.com/xitu/gold-miner#前端" target="_blank" rel="noopener">前端</a>、<a href="https://github.com/xitu/gold-miner#后端" target="_blank" rel="noopener">后端</a>、<a href="https://github.com/xitu/gold-miner#区块链" target="_blank" rel="noopener">区块链</a>、<a href="https://github.com/xitu/gold-miner#产品" target="_blank" rel="noopener">产品</a>、<a href="https://github.com/xitu/gold-miner#设计" target="_blank" rel="noopener">设计</a>、<a href="https://github.com/xitu/gold-miner#人工智能" target="_blank" rel="noopener">人工智能</a>等领域，想要查看更多优质译文请持续关注 <a href="https://github.com/xitu/gold-miner" target="_blank" rel="noopener">掘金翻译计划</a>、<a href="http://weibo.com/juejinfanyi" target="_blank" rel="noopener">官方微博</a>、<a href="https://zhuanlan.zhihu.com/juejinfanyi" target="_blank" rel="noopener">知乎专栏</a>。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js"></script>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/hexoBlog/tags/Serverless/" rel="tag"># Serverless</a>
+              <a href="/hexoBlog/tags/Go/" rel="tag"># Go</a>
+              <a href="/hexoBlog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/hexoBlog/tags/Lambda/" rel="tag"># Lambda</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/hexoBlog/2018/04/12/Github-Pages部署个人博客-Hexo篇/" rel="prev" title="Github Pages部署个人博客 - Hexo篇">
+      <i class="fa fa-chevron-left"></i> Github Pages部署个人博客 - Hexo篇
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/hexoBlog/2018/06/03/给人类的机器学习指南🤖👶/" rel="next" title="给人类的机器学习指南🤖👶">
+      给人类的机器学习指南🤖👶 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#构建-AWS-CLI"><span class="nav-number">1.</span> <span class="nav-text">构建 AWS CLI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建并部署一个-Lambda-函数"><span class="nav-number">2.</span> <span class="nav-text">创建并部署一个 Lambda 函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#链接到-DynamoDB"><span class="nav-number">3.</span> <span class="nav-text">链接到 DynamoDB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#构建-HTTPS-API"><span class="nav-number">4.</span> <span class="nav-text">构建 HTTPS API</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理事件"><span class="nav-number">5.</span> <span class="nav-text">处理事件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署-API"><span class="nav-number">6.</span> <span class="nav-text">部署 API</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#支持多种行为"><span class="nav-number">7.</span> <span class="nav-text">支持多种行为</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="陆尘"
+      src="/hexoBlog/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">陆尘</p>
+  <div class="site-description" itemprop="description">人分两类 要么迷人 要么乏味</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/hexoBlog/archives/">
+        
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/hexoBlog/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/hexoBlog/tags/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+<!-- div id="music163player" -->
+    <!-- iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=521784134&auto=1&height=66" --><!-- /iframe -->
+<!-- /div -->
+
+<embed src="http://www.xiami.com/widget/51707075_274326798_235_346_FF8719_494949_0/collectPlayer.swf" type="application/x-shockwave-flash" width="235" height="346" wmode="opaque"></embed>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">陆尘</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.6.0
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/hexoBlog/lib/anime.min.js"></script>
+  <script src="/hexoBlog/lib/velocity/velocity.min.js"></script>
+  <script src="/hexoBlog/lib/velocity/velocity.ui.min.js"></script>
+<script src="/hexoBlog/js/utils.js"></script><script src="/hexoBlog/js/motion.js"></script>
+<script src="/hexoBlog/js/schemes/pisces.js"></script>
+<script src="/hexoBlog/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+<span id="jinrishici-sentence">正在加载今日诗词....</span>
+
+</body>
+</html>

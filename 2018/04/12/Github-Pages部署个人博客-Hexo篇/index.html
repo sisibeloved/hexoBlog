@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN,_en,default">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/hexoBlog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/hexoBlog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/hexoBlog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/hexoBlog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/hexoBlog/css/main.css">
+
+
+<link rel="stylesheet" href="/hexoBlog/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://sisibeloved.github.io/hexoBlog').hostname,
+    root: '/hexoBlog/',
+    scheme: 'Gemini',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="前言想在Github上搭建一个个人博客，在网上找了不少的文章，但有的是使用的旧版本，有的语焉不详，最后还是磕磕绊绊地搭起来了，因此写了这篇文章，对自己踩过的坑进行一个总结。水平有限，还请见谅。">
+<meta name="keywords" content="Github,Blog">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Github Pages部署个人博客 - Hexo篇">
+<meta property="og:url" content="https://sisibeloved.github.io/hexoBlog/2018/04/12/Github-Pages部署个人博客-Hexo篇/index.html">
+<meta property="og:site_name" content="luchen&#39;s blog">
+<meta property="og:description" content="前言想在Github上搭建一个个人博客，在网上找了不少的文章，但有的是使用的旧版本，有的语焉不详，最后还是磕磕绊绊地搭起来了，因此写了这篇文章，对自己踩过的坑进行一个总结。水平有限，还请见谅。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-10-15T09:54:20.851Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Github Pages部署个人博客 - Hexo篇">
+<meta name="twitter:description" content="前言想在Github上搭建一个个人博客，在网上找了不少的文章，但有的是使用的旧版本，有的语焉不详，最后还是磕磕绊绊地搭起来了，因此写了这篇文章，对自己踩过的坑进行一个总结。水平有限，还请见谅。">
+
+<link rel="canonical" href="https://sisibeloved.github.io/hexoBlog/2018/04/12/Github-Pages部署个人博客-Hexo篇/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Github Pages部署个人博客 - Hexo篇 | luchen's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/hexoBlog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">luchen's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/hexoBlog/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/hexoBlog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/hexoBlog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/hexoBlog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://sisibeloved.github.io/hexoBlog/2018/04/12/Github-Pages部署个人博客-Hexo篇/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/hexoBlog/images/avatar.jpg">
+      <meta itemprop="name" content="陆尘">
+      <meta itemprop="description" content="人分两类 要么迷人 要么乏味">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="luchen's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Github Pages部署个人博客 - Hexo篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-12 10:34:00" itemprop="dateCreated datePublished" datetime="2018-04-12T10:34:00+08:00">2018-04-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-15 17:54:20" itemprop="dateModified" datetime="2019-10-15T17:54:20+08:00">2019-10-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/hexoBlog/categories/Blog/" itemprop="url" rel="index">
+                    <span itemprop="name">Blog</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>想在Github上搭建一个个人博客，在网上找了不少的文章，但有的是使用的旧版本，有的语焉不详，最后还是磕磕绊绊地搭起来了，因此写了这篇文章，对自己踩过的坑进行一个总结。水平有限，还请见谅。</p>
+<a id="more"></a>
+
+<h2 id="系统环境"><a href="#系统环境" class="headerlink" title="系统环境"></a>系统环境</h2><ul>
+<li><strong>Windows 10 教育版</strong></li>
+<li><strong>Node.js v8.7.0</strong></li>
+<li><strong>Npm v5.4.2</strong></li>
+<li><strong>Git v2.13.0</strong></li>
+</ul>
+<h2 id="在GitHub上创建Github-Pages项目"><a href="#在GitHub上创建Github-Pages项目" class="headerlink" title="在GitHub上创建Github Pages项目"></a>在GitHub上创建Github Pages项目</h2><h3 id="1-创建新仓库"><a href="#1-创建新仓库" class="headerlink" title="1. 创建新仓库"></a>1. 创建新仓库</h3><p>Github Pages分为两类，用户或组织主页，项目主页。  </p>
+<ul>
+<li>创建用户或组织主页，只需创建一个名称为<code>{yourusername}.github.io</code>的新仓库即可。这边的<code>yourusername</code>填写自己的用户名。Github会识别并自动将该仓库设为Github Pages。用户主页是唯一的，填其他名称只会被当成普通项目。  </li>
+<li>创建项目主页。先新建一个仓库，名称随意，或是使用原有的仓库都可以。在<code>项目主页 -&gt; Settings -&gt; Options -&gt; Github Pages</code>中，将Source选项置为master branch，然后Save，这个项目就变成一个Github Pages项目了。</li>
+</ul>
+<h3 id="2-分支管理"><a href="#2-分支管理" class="headerlink" title="2. 分支管理"></a>2. 分支管理</h3><p>Github Pages会自动部署静态网页文件，而上一步是将master分支作为部署的默认分支。</p>
+<p>Github Pages部署分支设置中，可以有三种设置：</p>
+<ul>
+<li>master 分支</li>
+<li>master 分支下的/doc文件夹</li>
+<li>gh-pages 分支</li>
+</ul>
+<p><strong>其中gh-pages分支的选项需要创建这个分支才会显示出来。</strong></p>
+<p>我个人是这样设置分支的：<br>新建一个blog-src分支用来管理Hexo的源代码，<br>gh-pages分支用来管理Hexo生成的静态网页文件，即部署到Github Pages上的文件，<br>master分支保留（个人习惯）。<br>你也可以另开一个项目用来管理Hexo源代码的版本。</p>
+<h2 id="安装Hexo"><a href="#安装Hexo" class="headerlink" title="安装Hexo"></a>安装Hexo</h2><p>统一说明一下以下的代码示例，&lt;&gt;中的是必填参数，[]中的是选填参数。</p>
+<h3 id="1-安装Hexo"><a href="#1-安装Hexo" class="headerlink" title="1. 安装Hexo"></a>1. 安装Hexo</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-生成Hexo项目"><a href="#2-生成Hexo项目" class="headerlink" title="2. 生成Hexo项目"></a>2. 生成Hexo项目</h3><p>在你想创建博客的文件夹中初始化Hexo。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo init [projectname]</span><br></pre></td></tr></table></figure>
+
+<p>如果带了项目名称，会生成一个带有该名称的文件夹；如果没带参数，则必须在空文件夹下运行，不然会报错。</p>
+<h3 id="3-拉取Github项目到本地"><a href="#3-拉取Github项目到本地" class="headerlink" title="3. 拉取Github项目到本地"></a>3. 拉取Github项目到本地</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/yourusername/yourprojectname.git</span><br></pre></td></tr></table></figure>
+
+<p>然后把之前生成的Hexo项目文件夹下的内容全部复制过来。关于Git的使用请自行掌握，因为贴Git的代码很容易引起各种各样的错误。最后把项目push到blog-src分支上（换成你自己的源码分支）。</p>
+<h2 id="使用Hexo"><a href="#使用Hexo" class="headerlink" title="使用Hexo"></a>使用Hexo</h2><h3 id="1-常用命令"><a href="#1-常用命令" class="headerlink" title="1. 常用命令"></a>1. 常用命令</h3><ul>
+<li><code>hexo generate [-d]</code></li>
+<li><code>hexo serve [-p port]</code></li>
+<li><code>hexo deploy [-g]</code></li>
+</ul>
+<p>Hexo命令大多可以缩写，如<code>hexo serve --port 5000</code>可以缩写成<code>hexo s -p 5000</code>。</p>
+<p>更多命令和参数可参阅<a href="https://hexo.io/zh-cn/docs/commands.html" target="_blank" rel="noopener">官方文档</a>。</p>
+<h3 id="2-编译"><a href="#2-编译" class="headerlink" title="2. 编译"></a>2. 编译</h3><p><strong>[可选]</strong><br>清除缓存：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br></pre></td></tr></table></figure>
+
+<p>编译：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo g</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-运行"><a href="#3-运行" class="headerlink" title="3. 运行"></a>3. 运行</h3><p>启用服务：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo s</span><br></pre></td></tr></table></figure>
+
+<p>默认启动地址为<code>http://localhost:4000/</code></p>
+<p>如果4000端口被占用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo s -p [port]</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-部署"><a href="#4-部署" class="headerlink" title="4. 部署"></a>4. 部署</h3><p>在博客所在文件夹下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
+
+<p>这是用npm安装hexo部署到git的插件，<code>--save</code>会把这个包写入到<code>package.json</code>，切换到其他电脑时可以不需要重新安装。  </p>
+<h4 id="修改-config-yml："><a href="#修改-config-yml：" class="headerlink" title="修改_config.yml："></a>修改<code>_config.yml</code>：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repo: git@github.com:yourusername/yourprojectname.git</span><br><span class="line">  branch: gh-pages</span><br></pre></td></tr></table></figure>
+
+<p>将repo和branch换成自己的。</p>
+<p><strong>注意：</strong></p>
+<p>1.repo可以在Github上复制，但记得选<code>Clone with SSH</code>，只能走Git协议，走HTTPS协议会报错</p>
+<p>2.branch选择Github Pages中设置的那个分支，而不是拉取这个项目的分支</p>
+<h2 id="博文写作"><a href="#博文写作" class="headerlink" title="博文写作"></a>博文写作</h2><h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── .deploy</span><br><span class="line">├── public</span><br><span class="line">├── scaffolds</span><br><span class="line">|   ├── draft.md</span><br><span class="line">|   ├── page.md</span><br><span class="line">|   └── post.md</span><br><span class="line">├── scripts</span><br><span class="line">├── source</span><br><span class="line">|   ├── _drafts</span><br><span class="line">|   └── _posts</span><br><span class="line">├── themes</span><br><span class="line">├── _config.yml</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
+
+<p>scaffolds：脚手架，即对应的layout生成新博文时的头信息模板</p>
+<p>source：源文件，博文会根据layout分层放置</p>
+<p>关于添加模板和草稿参看<a href="https://hexo.io/zh-cn/docs/writing.html" target="_blank" rel="noopener">写作 | Hexo</a>。</p>
+<h3 id="新建博文"><a href="#新建博文" class="headerlink" title="新建博文"></a>新建博文</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo n [layout] &lt;filename&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="头信息"><a href="#头信息" class="headerlink" title="头信息"></a>头信息</h3><p>post的模板md：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: &#123;&#123; title &#125;&#125;</span><br><span class="line">date: &#123;&#123; date &#125;&#125;</span><br><span class="line">tags:</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>实际生成的md：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: RocketMQ安装及部署</span><br><span class="line">date: 2018-04-09 10:04:41</span><br><span class="line">tags:</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>时间格式在<code>_config.yml</code>中设置，Hexo会根据时间来解析博文。</p>
+<h2 id="更换主题"><a href="#更换主题" class="headerlink" title="更换主题"></a>更换主题</h2><p>Hexo自带的默认主题是landscape，不过我们可以从<a href="https://hexo.io/themes/" target="_blank" rel="noopener">Theme | Hexo</a>或Github上找到喜欢的主题。</p>
+<h3 id="更换主题的三种方法"><a href="#更换主题的三种方法" class="headerlink" title="更换主题的三种方法"></a>更换主题的三种方法</h3><ul>
+<li><p>从Github主页下载release包，解压到<code>themes/</code>文件夹下</p>
+</li>
+<li><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> --branch v6.0.0 https://github.com/theme-next/hexo-theme-next themes/next</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>(仅限linux)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir themes/next</span><br><span class="line">$ curl -s https://api.github.com/repos/theme-next/hexo-theme-next/releases/latest | grep tarball_url | cut -d <span class="string">'"'</span> -f 4 | wget -i - -O- | tar -zx -C themes/next --strip-components=1</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="设置主题"><a href="#设置主题" class="headerlink" title="设置主题"></a>设置主题</h3><p>在项目的<code>_config.yml</code>中，将<code>theme：</code>改成<code>themes/</code>下对应文件夹的名称。如果是解压出来的“hexo-theme-next-6.1.0”就写“hexo-theme-next-6.1.0”，如果是自建的“next”就写“next”。</p>
+<h3 id="更换Next主题"><a href="#更换Next主题" class="headerlink" title="更换Next主题"></a>更换Next主题</h3><p>Next是Hexo最受欢迎的主题之一，不过我在使用的时候发现Github主页上v6.0.0的文档并不详尽，官网也还没上线，旧有的文档可以借鉴，但有些小地方还是会有差别。下面用v5和v6来区分新版本。</p>
+<p><a href="http://theme-next.iissnan.com/" target="_blank" rel="noopener">v5的文档地址</a></p>
+<p>旧的主页（更新到v5.1.2）:<br><a href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">https://github.com/iissnan/hexo-theme-next</a></p>
+<p>新的主页（v6.0.0之后从这儿开始更新）:<br><a href="https://github.com/theme-next/hexo-theme-next" target="_blank" rel="noopener">https://github.com/theme-next/hexo-theme-next</a></p>
+<h3 id="配置Next主题"><a href="#配置Next主题" class="headerlink" title="配置Next主题"></a>配置Next主题</h3><p><strong>Next版本 ： v6.1.0</strong></p>
+<p>修改主题的<code>_config.yml</code>（注意区分项目和主题）。整个文件有一千行，各种配置项非常丰富，而且配上了大量的注释，我也只是挑了一小部分，大家可以按需修改。</p>
+<h4 id="切换风格"><a href="#切换风格" class="headerlink" title="切换风格"></a>切换风格</h4><p>官方提供了四种风格，各有千秋。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># ---------------------------------------------------------------</span><br><span class="line"># Scheme Settings</span><br><span class="line"># ---------------------------------------------------------------</span><br><span class="line"></span><br><span class="line"># Schemes</span><br><span class="line">#scheme: Muse</span><br><span class="line">#scheme: Mist</span><br><span class="line">#scheme: Pisces</span><br><span class="line">scheme: Gemini</span><br></pre></td></tr></table></figure>
+
+<h4 id="语言选择"><a href="#语言选择" class="headerlink" title="语言选择"></a>语言选择</h4><p>在项目的<code>_config.yml</code>中修改language选项：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 写法1</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="comment"># 写法2，会使用最上面一种语言</span></span><br><span class="line"><span class="attr">language:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">_en</span></span><br></pre></td></tr></table></figure>
+
+<p>与v5不同的是语言的写法，简体中文是<code>zh-CN</code>，英文是<code>_en</code>。语言文件位于主题的<code>language/</code>文件夹下，对应的yml文件的名称就是语言的名称，可以修改对应的语言文件来修改一些指定字段的表述，也可以自定义对应语言的字段。可以参考<a href="https://hexo.io/zh-cn/docs/internationalization.html" target="_blank" rel="noopener">国际化 | Hexo</a>。</p>
+<h4 id="社交页面"><a href="#社交页面" class="headerlink" title="社交页面"></a>社交页面</h4><p>按需要解除注释并修改。下方的<code>icons_only</code>是’只显示图标’，我觉得比较简洁就改为true了。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Social Links.</span></span><br><span class="line"><span class="comment"># Usage: `Key: permalink || icon`</span></span><br><span class="line"><span class="comment"># Key is the link label showing to end users.</span></span><br><span class="line"><span class="comment"># Value before `||` delimeter is the target permalink.</span></span><br><span class="line"><span class="comment"># Value after `||` delimeter is the name of FontAwesome icon. If icon (with or without delimeter) is not specified, globe icon will be loaded.</span></span><br><span class="line"><span class="attr">social:</span></span><br><span class="line"><span class="attr">  GitHub:</span> <span class="attr">https://github.com/yourname</span> <span class="string">||</span> <span class="string">github</span></span><br><span class="line"><span class="attr">  E-Mail:</span> <span class="string">yourname@youremail.com</span> <span class="string">||</span> <span class="string">envelope</span></span><br><span class="line">  <span class="comment">#Google: https://plus.google.com/yourname || google</span></span><br><span class="line">  <span class="comment">#Twitter: https://twitter.com/yourname || twitter</span></span><br><span class="line">  <span class="comment">#FB Page: https://www.facebook.com/yourname || facebook</span></span><br><span class="line">  <span class="comment">#VK Group: https://vk.com/yourname || vk</span></span><br><span class="line">  <span class="comment">#StackOverflow: https://stackoverflow.com/yourname || stack-overflow</span></span><br><span class="line">  <span class="comment">#YouTube: https://youtube.com/yourname || youtube</span></span><br><span class="line">  <span class="comment">#Instagram: https://instagram.com/yourname || instagram</span></span><br><span class="line">  <span class="comment">#Skype: skype:yourname?call|chat || skype</span></span><br><span class="line"></span><br><span class="line"><span class="attr">social_icons:</span></span><br><span class="line"><span class="attr">  enable:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">  icons_only:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">  transition:</span> <span class="literal">false</span></span><br><span class="line">  <span class="comment"># Dependencies: exturl: true in Tags Settings section below.</span></span><br><span class="line">  <span class="comment"># To encrypt links above use https://www.base64encode.org</span></span><br><span class="line">  <span class="comment"># Example encoded link: `GitHub: aHR0cHM6Ly9naXRodWIuY29tL3RoZW1lLW5leHQ= || github`</span></span><br><span class="line"><span class="attr">  exturl:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Follow me on GitHub banner in right-top corner.</span></span><br><span class="line"><span class="comment"># Usage: `permalink || title`</span></span><br><span class="line"><span class="comment"># Value before `||` delimeter is the target permalink.</span></span><br><span class="line"><span class="comment"># Value after `||` delimeter is the title and aria-label name.</span></span><br><span class="line"><span class="comment">#github_banner: https://github.com/yourname || Follow me on GitHub</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><p><strong>1. Github发送邮件 - 编译未通过</strong></p>
+<blockquote>
+<p>The page build failed for the <code>master</code> branch with the following error:</p>
+<p>The tag <code>fancybox</code> on line 77 in <code>themes/landscape/README.md</code> is not a recognized Liquid tag. </p>
+</blockquote>
+<ul>
+<li>见<a href="#修改`_config.yml`">修改<code>_config.yml</code></a></li>
+<li>选择Github Pages分支</li>
+<li>不要使用Git直接推送，应该在<code>_config.yml</code>中设置deploy的配置，然后使用<code>hexo d -g</code>命令进行推送</li>
+</ul>
+<p><strong>2. <code>hexo d -g</code>失败</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">error: failed to execute prompt script (exit code 1)</span><br><span class="line">fatal: could not read Username for &apos;https://github.com&apos;: No error</span><br><span class="line">FATAL Something&apos;s wrong. Maybe you can find the solution here: http://hexo.io/docs/troubleshooting.html</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>见<a href="#修改_config.yml">修改<code>_config.yml</code></a></li>
+<li>将HTTPS协议改成Git协议，注意<code>github.com</code>后面，HTTPS是<code>/</code>，Git是<code>:</code></li>
+</ul>
+
+    </div>
+
+    
+    
+    <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js"></script>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/hexoBlog/tags/Github/" rel="tag"># Github</a>
+              <a href="/hexoBlog/tags/Blog/" rel="tag"># Blog</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/hexoBlog/2018/03/20/RocketMQ安装及部署/" rel="prev" title="RocketMQ安装及部署">
+      <i class="fa fa-chevron-left"></i> RocketMQ安装及部署
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/hexoBlog/2018/05/10/使用 Go 和 AWS Lambda 构建无服务 API/" rel="next" title="使用 Go 和 AWS Lambda 构建无服务 API">
+      使用 Go 和 AWS Lambda 构建无服务 API <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#系统环境"><span class="nav-number">2.</span> <span class="nav-text">系统环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在GitHub上创建Github-Pages项目"><span class="nav-number">3.</span> <span class="nav-text">在GitHub上创建Github Pages项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-创建新仓库"><span class="nav-number">3.1.</span> <span class="nav-text">1. 创建新仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-分支管理"><span class="nav-number">3.2.</span> <span class="nav-text">2. 分支管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Hexo"><span class="nav-number">4.</span> <span class="nav-text">安装Hexo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-安装Hexo"><span class="nav-number">4.1.</span> <span class="nav-text">1. 安装Hexo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-生成Hexo项目"><span class="nav-number">4.2.</span> <span class="nav-text">2. 生成Hexo项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-拉取Github项目到本地"><span class="nav-number">4.3.</span> <span class="nav-text">3. 拉取Github项目到本地</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用Hexo"><span class="nav-number">5.</span> <span class="nav-text">使用Hexo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-常用命令"><span class="nav-number">5.1.</span> <span class="nav-text">1. 常用命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-编译"><span class="nav-number">5.2.</span> <span class="nav-text">2. 编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-运行"><span class="nav-number">5.3.</span> <span class="nav-text">3. 运行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-部署"><span class="nav-number">5.4.</span> <span class="nav-text">4. 部署</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#修改-config-yml："><span class="nav-number">5.4.1.</span> <span class="nav-text">修改_config.yml：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#博文写作"><span class="nav-number">6.</span> <span class="nav-text">博文写作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#项目结构"><span class="nav-number">6.1.</span> <span class="nav-text">项目结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新建博文"><span class="nav-number">6.2.</span> <span class="nav-text">新建博文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#头信息"><span class="nav-number">6.3.</span> <span class="nav-text">头信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更换主题"><span class="nav-number">7.</span> <span class="nav-text">更换主题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#更换主题的三种方法"><span class="nav-number">7.1.</span> <span class="nav-text">更换主题的三种方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置主题"><span class="nav-number">7.2.</span> <span class="nav-text">设置主题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更换Next主题"><span class="nav-number">7.3.</span> <span class="nav-text">更换Next主题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Next主题"><span class="nav-number">7.4.</span> <span class="nav-text">配置Next主题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#切换风格"><span class="nav-number">7.4.1.</span> <span class="nav-text">切换风格</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#语言选择"><span class="nav-number">7.4.2.</span> <span class="nav-text">语言选择</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#社交页面"><span class="nav-number">7.4.3.</span> <span class="nav-text">社交页面</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见问题"><span class="nav-number">8.</span> <span class="nav-text">常见问题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="陆尘"
+      src="/hexoBlog/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">陆尘</p>
+  <div class="site-description" itemprop="description">人分两类 要么迷人 要么乏味</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/hexoBlog/archives/">
+        
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/hexoBlog/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/hexoBlog/tags/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+<!-- div id="music163player" -->
+    <!-- iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=521784134&auto=1&height=66" --><!-- /iframe -->
+<!-- /div -->
+
+<embed src="http://www.xiami.com/widget/51707075_274326798_235_346_FF8719_494949_0/collectPlayer.swf" type="application/x-shockwave-flash" width="235" height="346" wmode="opaque"></embed>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">陆尘</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.6.0
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/hexoBlog/lib/anime.min.js"></script>
+  <script src="/hexoBlog/lib/velocity/velocity.min.js"></script>
+  <script src="/hexoBlog/lib/velocity/velocity.ui.min.js"></script>
+<script src="/hexoBlog/js/utils.js"></script><script src="/hexoBlog/js/motion.js"></script>
+<script src="/hexoBlog/js/schemes/pisces.js"></script>
+<script src="/hexoBlog/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+<span id="jinrishici-sentence">正在加载今日诗词....</span>
+
+</body>
+</html>

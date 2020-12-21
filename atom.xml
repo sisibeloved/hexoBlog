@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://sisibeloved.github.io/hexoBlog/</id>
+    <title>Gridea</title>
+    <updated>2020-12-21T11:27:21.910Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://sisibeloved.github.io/hexoBlog/"/>
+    <link rel="self" href="https://sisibeloved.github.io/hexoBlog/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://sisibeloved.github.io/hexoBlog/images/avatar.png</logo>
+    <icon>https://sisibeloved.github.io/hexoBlog/favicon.ico</icon>
+    <rights>All rights reserved 2020, Gridea</rights>
+    <entry>
+        <title type="html"><![CDATA[MyBatis 通用枚举处理器]]></title>
+        <id>https://sisibeloved.github.io/hexoBlog/post/mybatis-tong-yong-mei-ju-chu-li-qi/</id>
+        <link href="https://sisibeloved.github.io/hexoBlog/post/mybatis-tong-yong-mei-ju-chu-li-qi/">
+        </link>
+        <updated>2020-12-21T11:24:39.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="背景">背景</h2>
+<p>mybatis在3.4.5及之后版本中，新增了一个指定全局默认枚举类型处理器的配置项；</p>
+<ul>
+<li>需要将mybatis-spring-boot-starter更新到2.1.4</li>
+<li>对应mybatis-spring版本2.0.6</li>
+<li>对应mybatis版本3.5.6</li>
+<li>相应地需要更新druid到1.1.21以上</li>
+</ul>
+<h2 id="配置">配置</h2>
+<pre><code class="language-java">    public SqlSessionFactory sqlSessionFactory(DataSource yiwiseDataSource, PageHelper pageHelper, MybatisInterceptor mybatisInterceptor) throws Exception {
+
+		 // ...
+
+        SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
+        bean.setDefaultEnumTypeHandler(CodeIdentifyEnumHandler.class);
+
+        // ...
+
+        bean.setTypeHandlersPackage(&quot;com.yiwise.aiplatform.core.model.enums&quot;);
+        return bean.getObject();
+    }
+</code></pre>
+<h2 id="源码解析">源码解析</h2>
+<pre><code class="language-java">  private Map&lt;JdbcType, TypeHandler&lt;?&gt;&gt; getJdbcHandlerMap(Type type) {
+    Map&lt;JdbcType, TypeHandler&lt;?&gt;&gt; jdbcHandlerMap = typeHandlerMap.get(type);
+    if (NULL_TYPE_HANDLER_MAP.equals(jdbcHandlerMap)) {
+      return null;
+    }
+    if (jdbcHandlerMap == null &amp;&amp; type instanceof Class) {
+      Class&lt;?&gt; clazz = (Class&lt;?&gt;) type;
+      if (Enum.class.isAssignableFrom(clazz)) {
+        Class&lt;?&gt; enumClass = clazz.isAnonymousClass() ? clazz.getSuperclass() : clazz;
+        jdbcHandlerMap = getJdbcHandlerMapForEnumInterfaces(enumClass, enumClass);
+        if (jdbcHandlerMap == null) {
+          register(enumClass, getInstance(enumClass, defaultEnumTypeHandler));
+          return typeHandlerMap.get(enumClass);
+        }
+      } else {
+        jdbcHandlerMap = getJdbcHandlerMapForSuperclass(clazz);
+      }
+    }
+    typeHandlerMap.put(type, jdbcHandlerMap == null ? NULL_TYPE_HANDLER_MAP : jdbcHandlerMap);
+    return jdbcHandlerMap;
+  }
+</code></pre>
+<p>判断是Enum类型，且没有在全局map中拿到handler，会调用<code>defaultEnumTypeHandler</code>，在初始化时会将 enumClass 传入，因此生成的就是子类的 typeHandler。</p>
+<pre><code class="language-java">    public CodeIdentifyEnumHandler(Class&lt;T&gt; type) {
+        if (type == null) {
+            throw new IllegalArgumentException(&quot;Type argument cannot be null&quot;);
+        }
+        this.type = type;
+    }
+</code></pre>
+<h2 id="问题">问题</h2>
+<h3 id="1-初始化报错">1. 初始化报错</h3>
+<p><code>CodeIdentifyEnumHandler</code> 类需要去掉abstract修饰，且添加无参构造函数，否则拿不到合适的构造器，初始化会报错。</p>
+<h3 id="2-jsr支持">2. JSR支持</h3>
+<p>MyBatis 3.4.1 之后内置了对 jsr310 的支持，导致调用<code>LocalDateTimeTypeHandler</code>等处理器报错，需要升级druid包版本到1.1.21以上。</p>
+<p>因为内置的处理器会调用 ResultSet 的<code>getObject()</code> 方法：</p>
+<pre><code class="language-java">  @Override
+  public LocalDateTime getNullableResult(ResultSet rs, String columnName) throws SQLException {
+    return rs.getObject(columnName, LocalDateTime.class);
+  }
+</code></pre>
+<p>而因为使用druid，实际使用中使用的实现类是 <code>DruidPooledResultSet</code>，在1.1.21版本以前<code>getObject()</code>方法并未实现，会直接抛出<code>SQLFeatureNotSupportedException</code>异常。</p>
+]]></content>
+    </entry>
+</feed>

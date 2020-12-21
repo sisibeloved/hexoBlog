@@ -1,7 +1,7 @@
 ---
 title: 使用 Go 和 AWS Lambda 构建无服务 API
 date: 2018-05-10 11:36:22
-categories: 翻译
+categories: Translation
 tags:
 - Serverless
 - Go

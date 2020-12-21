@@ -1,7 +1,7 @@
 ---
 title: RocketMQ安装及部署
 date: 2018-03-20 10:04:41
-categories: 运维
+categories: DevOps
 tags:
 - RocketMQ
 ---

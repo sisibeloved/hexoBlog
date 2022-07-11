@@ -6,7 +6,6 @@
    <a href="https://travis-ci.org/sisibeloved/hexoBlog"><img id="build-status" src="https://travis-ci.org/sisibeloved/hexoBlog.svg?branch=blog-src" alt="Build Status"></a>
    <a href="https://juejin.im/user/5a141f97f265da43346f8b6b/posts"><img id="like" src="https://img.shields.io/badge/掘金-113喜欢-blue.svg" alt="Juejin like"></a>
    <a href="https://juejin.im/user/5a141f97f265da43346f8b6b/posts"><img id="read" src="https://img.shields.io/badge/掘金-4.4k阅读-blue.svg" alt="Juejin read"></a>
-    <a href=""><img id="codetally" src="https://img.shields.io/codetally/triggerman722/colorstrap.svg" alt="Codetally"></a>
 </p>
 
 luchen's blog，[传送门](https://sisibeloved.github.io/hexoBlog)

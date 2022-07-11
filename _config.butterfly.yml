@@ -1,0 +1,169 @@
+# Butterfly 配置
+## 博客: https://butterfly.js.org/
+## 源码: https://github.com/jerryc127/hexo-theme-butterfly
+
+# 菜单
+menu:
+  Home: / || fas fa-home
+  Tags: /tags/ || fas fa-tags
+  Categories: /categories/ || fas fa-folder-open
+  Archives: /archives/ || fas fa-archive
+
+# 头像
+avatar:
+  img: /images/avatar.jpg
+
+# 侧边栏
+aside:
+  enable: true
+  hide: false
+  button: true
+  mobile: true # 手機頁面（ 顯示寬度 < 768px ）是否顯示aside內容
+  position: right # left or right
+  display:
+    archive: true
+    tag: true
+    category: true
+  card_author:
+    enable: true
+    description:
+    button:
+      enable: true
+      icon: fab fa-github
+      text: Github
+      link: https://github.com/sisibeloved
+  card_announcement:
+    enable: true
+    content: This is my Blog
+  card_recent_post:
+    enable: true
+    limit: 5 # if set 0 will show all
+    sort: date # date or updated
+  card_categories:
+    enable: true
+    limit: 8 # if set 0 will show all
+    expand: none # none/true/false
+  card_tags:
+    enable: true
+    limit: 40 # if set 0 will show all
+    color: false
+  card_archives:
+    enable: true
+    type: monthly # yearly or monthly
+    format: MMMM YYYY # eg: YYYY年MM月
+    order: -1 # Sort of order. 1, asc for ascending; -1, desc for descending
+    limit: 8 # if set 0 will show all
+  card_webinfo:
+    enable: true
+    post_count: true
+    last_push_date: true
+
+# 文章过期提醒
+noticeOutdate:
+  enable: true
+  style: flat # style: simple/flat
+  limit_day: 365 # When will it be shown
+  position: top # position: top/bottom
+  message_prev: It has been
+  message_next: days since the last update, the content of the article may be outdated.
+
+# 分页
+post_pagination: 2
+
+# 深色模式按钮
+darkmode:
+  enable: true
+  button: true
+  autoChangeMode: true
+
+# Meta 信息
+post_meta:
+  page:
+    date_type: both # created or updated or both 主頁文章日期是創建日或者更新日或都顯示
+    date_format: relative # date/relative 顯示日期還是相對日期
+    categories: true # true or false 主頁是否顯示分類
+    tags: true # true or false 主頁是否顯示標籤
+    label: true # true or false 顯示描述性文字
+  post:
+    date_type: both # created or updated or both 文章頁日期是創建日或者更新日或都顯示
+    date_format: relative # date/relative 顯示日期還是相對日期
+    categories: true # true or false 文章頁是否顯示分類
+    tags: true # true or false 文章頁是否顯示標籤
+    label: true # true or false 顯示描述性文字
+
+# 复制相关配置
+copy:
+  enable: true
+  copyright:
+    enable: true
+    limit_count: 50
+
+# 脚注
+footer:
+  owner:
+    enable: true
+    since: 2017
+
+# 访问人数
+busuanzi:
+  site_uv: true
+  site_pv: true
+  page_pv: true
+
+# 运行时间
+runtimeshow:
+  enable: true
+  publish_date: 2018/3/20 00:00:00
+  ##網頁開通時間
+  #格式: 月/日/年 時間
+  #也可以寫成 年/月/日 時間
+
+# 字数统计
+wordcount:
+  enable: true
+  post_wordcount: true
+  min2read: true
+  total_wordcount: true
+
+# 主页副标题
+subtitle:
+  enable: true
+  # Typewriter Effect (打字效果)
+  effect: true
+  # loop (循環打字)
+  loop: true
+  # source 調用第三方服務
+  # source: false 關閉調用
+  # source: 1  調用一言網的一句話（簡體） https://hitokoto.cn/
+  # source: 2  調用一句網（簡體） http://yijuzhan.com/
+  # 調用今日詩詞（簡體） https://www.jinrishici.com/
+  source: 3
+  # subtitle 會先顯示 source , 再顯示 sub 的內容
+  # 如果關閉打字效果，subtitle 只會顯示 sub 的第一行文字
+#  sub:
+#    - 今日事&#44;今日畢
+#    - Never put off till tomorrow what you can do today
+
+# 加载动画
+preloader: true
+
+# 预加载
+instantpage: true
+
+# 盘古插件
+pangu:
+  enable: true
+  field: post # site/post
+
+# valine 评论插件
+valine:
+  appId: CnnBD3PoSV4ms6kSdwoP03bb-9Nh9j0Va
+  appKey: bTkserMeruFeqRd57Nb4KGFC
+  avatar: monsterid # gravatar style https://valine.js.org/#/avatar
+  visitor: false
+  emojiCDN: //i0.hdslb.com/bfs/emote/
+
+# 社交图标
+social:
+  GitHub: https://github.com/sisibeloved || github
+  E-Mail: mailto:celavue@163.com || envelope

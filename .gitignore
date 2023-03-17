@@ -12,3 +12,7 @@ public/
 --- IDE ---
 .idea/
 .vscode/
+
+--- Git ---
+themes/next/.git/
+themes/next/.github/
